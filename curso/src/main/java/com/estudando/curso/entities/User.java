@@ -1,7 +1,6 @@
 package com.estudando.curso.entities;
 
 import jakarta.persistence.*;
-import jdk.jfr.Enabled;
 
 import java.io.Serializable;
 import java.util.Objects;
