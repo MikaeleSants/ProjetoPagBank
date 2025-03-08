@@ -1,11 +1,22 @@
 package com.estudando.curso.entities;
 
+import jakarta.persistence.*;
+import jdk.jfr.Enabled;
+
 import java.io.Serializable;
 import java.util.Objects;
-
+//mapeando a entidade:
+@Entity
+//User é uma palavra reservada do banco h2, por isso tem que renomear o banco:
+@Table(name = "tb_user")
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;
-
+    
+    //identificado o ID como chave primaria do banco de dados
+    @Id
+    //como é uma chave numerica, ela vai ser autoimplementável lá no banco de dados
+    //para informar isso usamos:
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private String email;
