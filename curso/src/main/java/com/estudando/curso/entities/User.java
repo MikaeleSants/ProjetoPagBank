@@ -1,8 +1,11 @@
 package com.estudando.curso.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 //mapeando a entidade:
 @Entity
@@ -21,6 +24,13 @@ public class User implements Serializable {
     private String email;
     private String phone;
     private String password;
+    /* a relação entre user e order é de one to many, o que signifca que
+     * será um user para varios pedidos, para indicar esse tipo de relação como chave estrageira
+     * para o JPA, se usa a annotation @OneToMany(mappedBy: "o nome de como ele foi declarado")
+     * o JsonIgnora é pra que não um loop na ligação entre user e order, pra um n ficar chamando o outro eternamente*/
+    @JsonIgnore
+    @OneToMany(mappedBy = "client")
+    private List<Order> orders = new ArrayList<>();
 
     public User() {
     }
@@ -84,4 +94,9 @@ public class User implements Serializable {
     public int hashCode() {
         return Objects.hashCode(id);
     }
+
+    public List<Order> getOrders() {
+        return orders;
+    }
+
 }
