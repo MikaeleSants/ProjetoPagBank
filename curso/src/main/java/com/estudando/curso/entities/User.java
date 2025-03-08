@@ -14,10 +14,10 @@ import java.util.Objects;
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;
     
-    //identificado o ID como chave primaria do banco de dados
-    @Id
+    //identificado o ID como chave primaria do banco de dados: @Id
     //como é uma chave numerica, ela vai ser autoimplementável lá no banco de dados
-    //para informar isso usamos:
+    //para informar isso usamos: @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
