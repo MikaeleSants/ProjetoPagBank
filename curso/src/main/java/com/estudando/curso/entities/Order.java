@@ -30,6 +30,12 @@ public class Order implements Serializable {
     private User client;
     @OneToMany(mappedBy = "id.order")
     private Set<OrderItem> Items = new HashSet<>();
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
+    /* CascadeType.ALL significa que qualquer operação feita em Order
+     será replicada automaticamente para Payment.
+     Se apagar um Order, o Payment correspondente também será apagado.
+     Se salvar um Order, o Payment associado será salvo automaticamente. */
+    private Payment payment;
 
 
     public Order() {
@@ -68,9 +74,18 @@ public class Order implements Serializable {
     public void setClient(User client) {
         this.client = client;
     }
+    public Payment getPayment() {
+        return payment;
+    }
+    public void setPayment(Payment payment) {
+        this.payment = payment;
+    }
     public Set<OrderItem> getItems() {
         return Items;
     }
+
+
+
 
     @Override
     public boolean equals(Object o) {
