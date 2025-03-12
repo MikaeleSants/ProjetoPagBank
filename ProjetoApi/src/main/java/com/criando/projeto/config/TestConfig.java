@@ -2,12 +2,12 @@ package com.criando.projeto.config;
 
 import com.criando.projeto.entities.*;
 import com.criando.projeto.repositories.*;
-import com.estudando.curso.entities.*;
-import com.estudando.projeto.entities.*;
+import com.criando.projeto.entities.*;
+import com.criando.projeto.entities.*;
 import com.criando.projeto.entities.enums.OrderStatus;
 import com.criando.projeto.entities.enums.PaymentMethod;
-import com.estudando.curso.repositories.*;
-import com.estudando.projeto.repositories.*;
+import com.criando.projeto.repositories.*;
+import com.criando.projeto.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
