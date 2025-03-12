@@ -2,11 +2,13 @@ package com.criando.projeto.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-
+import jakarta.validation.constraints.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+
 //mapeando a entidade:
 @Entity
 //User é uma palavra reservada do banco h2, por isso tem que renomear o banco:
@@ -20,9 +22,21 @@ public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @NotBlank(message = "O nome não pode estar vazio.")
+    @Size(min = 3, max = 100, message = "O nome deve ter entre 3 e 100 caracteres.")
     private String name;
+    @NotBlank(message = "O e-mail não pode estar vazio.")
+    @Email(message = "O e-mail deve ser válido.")
     private String email;
+    @NotBlank(message = "O telefone não pode estar vazio.")
+    @Size(min = 9, max = 17, message = "O telefone deve ter entre 3 e 17 caracteres.")
     private String phone;
+    @NotBlank(message = "A senha não pode estar vazia.")
+    @Size(min = 3, max = 8, message = "A senha deve ter entre 3 e 8 caracteres.")
+    @Pattern(
+            regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$",
+            message = "A senha deve conter pelo menos uma letra, um número e um símbolo especial (@$!%*?&)."
+    )
     private String password;
     /* a relação entre user e order é de one to many, o que signifca que
      * será um user para varios pedidos, para indicar esse tipo de relação como chave estrageira

@@ -2,6 +2,8 @@ package com.criando.projeto.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -15,8 +17,12 @@ public class Product implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @NotBlank(message = "O nome do produto não pode estar vazio.")
     private String name;
+    @NotBlank
     private String description;
+    @NotBlank
+    @Positive
     private Double price;
     /*
     * @ManyToMany // Indica um relacionamento muitos-para-muitos entre produtos e categorias

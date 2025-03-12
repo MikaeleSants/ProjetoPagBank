@@ -5,10 +5,14 @@ import com.criando.projeto.services.exceptions.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
 @ControllerAdvice
 public class ResourceExceptionHandler {
@@ -27,4 +31,18 @@ public class ResourceExceptionHandler {
         StandardError err = new StandardError(Instant.now(), status.value(), error, e.getMessage(), request.getRequestURI());
         return ResponseEntity.status(status).body(err);
     }
+    // Adicionando o tratamento para erros de validação de entrada
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ValidationError> handleValidationExceptions(MethodArgumentNotValidException e, HttpServletRequest request) {
+        String error = "Erro de validação";
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        ValidationError err = new ValidationError(Instant.now(), status.value(), error, "Erro nos campos", request.getRequestURI());
+
+        for (FieldError fieldError : e.getBindingResult().getFieldErrors()) {
+            err.addError(fieldError.getField(), fieldError.getDefaultMessage());
+        }
+
+        return ResponseEntity.status(status).body(err);
+    }
+
 }

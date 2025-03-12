@@ -2,6 +2,7 @@ package com.criando.projeto.resource;
 
 import com.criando.projeto.entities.Product;
 import com.criando.projeto.services.ProductServices;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +31,7 @@ public class ProductResources {
     }
 
     @PostMapping
-    public ResponseEntity<Product> insert(@RequestBody Product obj) {
+    public ResponseEntity<Product> insert(@Valid @RequestBody Product obj) {
         obj = productServices.insert(obj);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(obj.getId()).toUri();
         return ResponseEntity.created(uri).body(obj);
@@ -43,7 +44,7 @@ public class ProductResources {
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<Product> update(@PathVariable Long id, @RequestBody Product obj) {
+    public ResponseEntity<Product> update(@PathVariable Long id, @Valid @RequestBody Product obj) {
         obj = productServices.update(id, obj);
         return ResponseEntity.ok().body(obj);
     }
