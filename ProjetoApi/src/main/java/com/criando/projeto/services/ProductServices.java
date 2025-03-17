@@ -4,10 +4,13 @@ import com.criando.projeto.entities.Product;
 import com.criando.projeto.repositories.ProductRepository;
 import com.criando.projeto.services.exceptions.DatabaseException;
 import com.criando.projeto.services.exceptions.ResourceNotFoundException;
+import com.criando.projeto.specifcations.ProductSpec;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,9 +21,10 @@ public class ProductServices {
     @Autowired
     private ProductRepository productRepository;
 
-    public List<Product> findAll() {
-        return productRepository.findAll();
+    public List<Product> findAll(String name) {
+        return productRepository.findAll(ProductSpec.nameContains(name));
     }
+
 
     public Product findById(Long id) {
         Optional <Product> obj =  productRepository.findById(id);

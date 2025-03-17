@@ -19,8 +19,8 @@ public class ProductResources {
 
 
     @GetMapping
-    public ResponseEntity<List<Product>> findAll () {
-        List<Product> list = productServices.findAll();
+    public ResponseEntity<List<Product>> findAll(@RequestParam(required = false) String name) {
+        List<Product> list = productServices.findAll(name);
         return ResponseEntity.ok().body(list);
     }
 
