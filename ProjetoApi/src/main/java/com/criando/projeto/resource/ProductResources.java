@@ -1,6 +1,7 @@
 package com.criando.projeto.resource;
 
 import com.criando.projeto.entities.Product;
+import com.criando.projeto.queryFIlters.ProductQueryFilter;
 import com.criando.projeto.services.ProductServices;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +20,8 @@ public class ProductResources {
 
 
     @GetMapping
-    public ResponseEntity<List<Product>> findAll(@RequestParam(required = false) String name) {
-        List<Product> list = productServices.findAll(name);
+    public ResponseEntity<List<Product>> findAll(ProductQueryFilter filter) {
+        List<Product> list = productServices.findAll(filter.toSpecification());
         return ResponseEntity.ok().body(list);
     }
 
