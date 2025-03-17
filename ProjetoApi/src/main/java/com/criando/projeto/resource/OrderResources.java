@@ -1,6 +1,7 @@
 package com.criando.projeto.resource;
 
 import com.criando.projeto.entities.Order;
+import com.criando.projeto.queryFIlters.OrderQueryFilter;
 import com.criando.projeto.services.OrderServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,10 +20,8 @@ public class OrderResources {
 
     //responseEntity é um tipo do spring para retornar respostas de requisicoes web
     @GetMapping
-    public ResponseEntity<List<Order>> findAll () {
-        //Order u = new Order(1L, "Maria", "maria@gmail.com", "99999999", "12345");
-        //o primeiro atributo é do tipo Long, ai precisa por o L na frente
-        List<Order> list = orderServices.findAll();
+    public ResponseEntity<List<Order>> findAll(OrderQueryFilter filter) {
+        List<Order> list = orderServices.findAll(filter.toSpecification());
         return ResponseEntity.ok().body(list);
     }
 

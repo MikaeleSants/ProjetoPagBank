@@ -8,8 +8,9 @@ import org.springframework.data.jpa.domain.Specification;
 //A anotação @Data do Lombok gera automaticamente vários métodos, tipo os get e set
 public class ProductQueryFilter {
     private String name;
-    private Long categoryId;
     private String categoryName;
+    private Double minPrice;
+    private Double maxPrice;
 
     public Specification<Product> toSpecification() {
         Specification<Product> spec = Specification.where(null);
@@ -20,6 +21,14 @@ public class ProductQueryFilter {
 
         if (categoryName != null && !categoryName.isEmpty()) {
             spec = spec.and(categoryNameContains(categoryName));
+        }
+
+        if (minPrice != null) {
+            spec = spec.and(priceGreaterThanOrEqualTo(minPrice));
+        }
+
+        if (maxPrice != null) {
+            spec = spec.and(priceLessThanOrEqualTo(maxPrice));
         }
 
         return spec;
