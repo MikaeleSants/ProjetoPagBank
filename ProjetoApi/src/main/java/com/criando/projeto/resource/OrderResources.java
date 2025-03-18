@@ -3,13 +3,14 @@ package com.criando.projeto.resource;
 import com.criando.projeto.entities.Order;
 import com.criando.projeto.queryFIlters.OrderQueryFilter;
 import com.criando.projeto.services.OrderServices;
+import com.criando.projeto.services.exceptions.ResourceNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -33,4 +34,35 @@ public class OrderResources {
         Order obj = orderServices.findById(id);
         return ResponseEntity.ok().body(obj);
     }
+
+    @PostMapping
+    public ResponseEntity<Order> insert(@Valid @RequestBody Order obj) {
+        obj = orderServices.insert(obj);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(obj.getId()).toUri();
+        return ResponseEntity.created(uri).body(obj);
+    }
+
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        orderServices.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping(value = "/{id}")
+    public ResponseEntity<Order> update(@PathVariable Long id, @Valid @RequestBody Order obj) {
+        obj = orderServices.update(id, obj);
+        return ResponseEntity.ok().body(obj);
+    }
+
+    @PostMapping("/{orderId}/apply-coupon/{couponId}")
+    public ResponseEntity<Order> applyCouponToOrder(
+            @PathVariable Long orderId, @PathVariable Long couponId) {
+        try {
+            Order updatedOrder = orderServices.applyCouponToOrder(orderId, couponId);
+            return ResponseEntity.ok().body(updatedOrder);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }

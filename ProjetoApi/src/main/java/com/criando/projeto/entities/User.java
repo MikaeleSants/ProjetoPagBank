@@ -27,6 +27,7 @@ public class User implements Serializable {
     private String name;
     @NotBlank(message = "O e-mail não pode estar vazio.")
     @Email(message = "O e-mail deve ser válido.")
+    @Column(unique = true)
     private String email;
     @NotBlank(message = "O telefone não pode estar vazio.")
     @Size(min = 9, max = 17, message = "O telefone deve ter entre 3 e 17 caracteres.")

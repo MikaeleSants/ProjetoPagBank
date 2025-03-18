@@ -18,7 +18,6 @@ public class Payment implements Serializable {
     private Instant moment;
     @JsonIgnore
     @OneToOne
-    @MapsId
     private Order order;
     private Integer paymentMethod;
 

@@ -76,7 +76,7 @@ A API possui CRUD básico para USERS e PRODUCTS, além de GET para as demais ent
 3. Salva o pedido
 4. Retorna os dados do pedido ao cliente
 
-## **Validações de Entrada**
+### **Validações de Entrada**
 Para garantir a integridade dos dados, foram aplicadas as seguintes validações:
 
 ### **Validações Gerais:**
@@ -87,16 +87,36 @@ Para garantir a integridade dos dados, foram aplicadas as seguintes validações
 
 ### **Validações Específicas por Entidade:**
 - **User**:
-    - Nome e e-mail obrigatórios
+    - Nome e e-mail obrigatórios; 
+    - Ao email também foi adicionada anotação para impedir duplicatas.
     - Senha com requisitos mínimos de segurança
 - **Product**:
     - Nome obrigatório e com limite de caracteres
     - Preço deve ser positivo
 
+## **Filtros:**
+A criação de filtros foi feita usando as Especifications do Spring, a API de critérios do JPA.
+
+### Classe Produto:
+  * Filtro por Nome: Permite a busca de produtos pelo nome.
+  * Filtro por Categoria: Permite a filtragem de produtos com base na categoria.
+  * Filtro por Valor: Permite a busca de produtos dentro de uma faixa de valor específica, pelo valor min ou max.
+
+### Classe Order:
+  * Filtro por Status do Pedido: Permite a filtragem de pedidos com base no status (os status estão definidos em uma enum e 
+  o filtro permite buscar pelo nome da etapa)
+
 ## **Banco de Dados e Persistência**
 - **Banco de Dados**: PostgreSQL (perfil: DEV) e H2 (perfil: test)
 - **Conexões**: Via Spring Data JPA
 - **Queries**: Uso de Criteria API e JPQL para consultas dinâmicas (em construção)
+
+## **Criação de perfis**
+  * TESTE: Perfil de teste associado ao banco H2, acessado via navegador. 
+    Utiliza a classe TestConfig para inserção de dados no banco e o Postman para testar requisições.
+
+  * DESENVOLVIMENTO: Associado ao PostgreSQL, utilizando o PgAdmin. A inserção de dados de usuários e produtos é feita através do Postman, 
+  enquanto as demais tabelas são povoadas via PgAdmin.
 
 ## **Ferramentas e Tecnologias**
 - **Framework**: Spring Boot

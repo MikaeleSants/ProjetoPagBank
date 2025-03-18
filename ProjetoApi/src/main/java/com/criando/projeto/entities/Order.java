@@ -29,13 +29,17 @@ public class Order implements Serializable {
     @JoinColumn(name = "client_id")
     private User client;
     @OneToMany(mappedBy = "id.order")
-    private Set<OrderItem> Items = new HashSet<>();
+    private Set<OrderItem> items = new HashSet<>();
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
+    private Payment payment;
     /* CascadeType.ALL significa que qualquer operação feita em Order
      será replicada automaticamente para Payment.
      Se apagar um Order, o Payment correspondente também será apagado.
      Se salvar um Order, o Payment associado será salvo automaticamente. */
-    private Payment payment;
+
+    @OneToOne
+    @JoinColumn(name = "coupon_id", nullable = true)
+    private Coupon discount;
 
 
     public Order() {
@@ -47,7 +51,15 @@ public class Order implements Serializable {
         this.client = client;
     }
 
-
+    public Order(Long id, Instant moment, OrderStatus orderStatus, User client, Set<OrderItem> items, Coupon discount, Payment payment) {
+        this.id = id;
+        this.moment = moment;
+        setOrderStatus(orderStatus);
+        this.client = client;
+        this.items = items != null ? items : new HashSet<>();
+        this.discount = discount != null ? discount : null;
+        this.payment = payment;
+    }
 
     public Long getId() {
         return id;
@@ -81,14 +93,41 @@ public class Order implements Serializable {
         this.payment = payment;
     }
     public Set<OrderItem> getItems() {
-        return Items;
+        return items;
     }
+    public void setItems(Set<OrderItem> items) {
+        this.items = (items != null) ? items : new HashSet<>();
+    }
+    public void addItem(OrderItem item) {
+        if (item != null) {
+            this.items.add(item);
+        }
+    }
+    public Coupon getDiscount() {
+        return discount;
+    }
+    public void setDiscount(Coupon discount) {
+        this.discount = (discount != null) ? discount : null;
+    }
+    public void applyCoupon(Coupon coupon) {
+        this.discount = coupon;
+    }
+
+
+
     public Double getTotal() {
         Double total = 0.0;
-        for (OrderItem item : Items) {
+        for (OrderItem item : items) {
             total += item.getSubTotal();
-        } return total;
+        }
+        // Se houver um cupom de desconto
+        if (discount != null) {
+            total -= total * (discount.getDiscountPercentage() / 100);
+        }
+
+        return total;
     }
+
 
 
 
