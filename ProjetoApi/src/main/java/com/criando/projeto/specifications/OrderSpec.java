@@ -16,12 +16,14 @@ public class OrderSpec {
             if (status == null || status.isEmpty()) {
                 return null;
             }
-
+            try {
             // Convertendo o nome do status para a enum OrderStatus
             OrderStatus orderStatus = OrderStatus.valueOf(status.toUpperCase());
-
             // Retorna a condição de filtro para o status
-            return builder.equal(root.get("orderStatus"), orderStatus.getCode());
+            return builder.equal(root.get("orderStatus"), orderStatus.getCode());}
+            catch (IllegalArgumentException e) {
+                return null; // Retorna sem aplicar filtro se o status for inválido
+            }
         };
     }
 
