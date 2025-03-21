@@ -52,9 +52,8 @@ public class Order implements Serializable {
         this.client = client;
     }
 
-    public Order(Long id, Instant moment, OrderStatus orderStatus, User client, Set<OrderItem> items, Coupon discount, Payment payment) {
+    public Order(Long id, OrderStatus orderStatus, User client, Set<OrderItem> items, Coupon discount, Payment payment) {
         this.id = id;
-        this.moment = moment;
         setOrderStatus(orderStatus);
         this.client = client;
         this.items = items != null ? items : new HashSet<>();
@@ -104,6 +103,7 @@ public class Order implements Serializable {
             this.items.add(item);
         }
     }
+
     public Coupon getDiscount() {
         return discount;
     }
@@ -114,7 +114,12 @@ public class Order implements Serializable {
         this.discount = coupon;
     }
 
-
+    @PrePersist
+    public void prePersist() {
+        if (this.moment == null) {
+            this.moment = Instant.now(); // Define a data e hora atuais apenas se for nulo
+        }
+    }
 
     public Double getTotal() {
         Double total = 0.0;

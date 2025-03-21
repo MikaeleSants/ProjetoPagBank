@@ -50,10 +50,6 @@ VALUES
 ('Mesa de Escritório', 'Mesa ampla, ideal para home office.', 699.90),
 ('Cadeira Ergonômica', 'Cadeira ergonômica, ideal para longas horas de trabalho.', 399.90);
 
--- NOTA:
-Caso queria resetar a contagem dos id, usar esse comando:
-ALTER SEQUENCE tb_user_id_seq RESTART WITH 1;
-trocando o tb_user pela tabela especifica
 
 ## Associando os produtos às categorias
 No PgAdmin:
@@ -149,3 +145,250 @@ INSERT INTO tb_order_item (order_id, product_id, quantity, price)
 VALUES
 (5, 9, 1, 699.90),  -- 1 Mesa de Escritório
 (5, 10, 1, 399.90);  -- 1 Cadeira Ergonômica
+
+
+-- NOTA:
+Caso queria resetar a contagem dos id, usar esse comando:
+ALTER SEQUENCE tb_user_id_seq RESTART WITH 1;
+trocando o tb_user pela tabela especifica
+
+Para verificar o próximo ID que será atribuído automaticamente a uma tabela no MySQL:
+SELECT pg_sequence_last_value('tb_order_id_seq') + 1
+
+# CRIANDO REQUISIÇÕES APÓS CRUD DE ORDER:
+
+### TESTE DE CRIAÇÃO DE ORDER SEM PAYMENT E SEM COUPOM:
+
+Requisição POST:
+```Json
+{
+"orderStatus": 1,
+"client": {
+"id": 3
+},
+"items": [
+{
+"quantity": 2,
+"product": {
+"id": 4
+}
+},
+{
+"quantity": 1,
+"product": {
+"id": 3
+}
+}
+]
+}
+```
+Resultado:
+```json
+{
+  "id": 4,
+  "moment": "2025-03-21T18:02:24Z",
+  "orderStatus": "PAID",
+  "client": {
+    "id": 3,
+    "name": null,
+    "email": null,
+    "phone": null,
+    "password": null
+  },
+  "items": [
+    {
+      "quantity": 1,
+      "price": 179.9,
+      "product": {
+        "id": 3,
+        "name": "Tênis Esportivo",
+        "description": "Tênis para caminhada com ótima aderência.",
+        "price": 179.9,
+        "categories": [
+          {
+            "id": 4,
+            "name": "Esportes"
+          }
+        ]
+      },
+      "subTotal": 179.9
+    },
+    {
+      "quantity": 2,
+      "price": 299.9,
+      "product": {
+        "id": 4,
+        "name": "Mochila de Couro",
+        "description": "Mochila de couro legítimo, ideal para o trabalho ou estudos.",
+        "price": 299.9,
+        "categories": [
+          {
+            "id": 1,
+            "name": "Roupas"
+          }
+        ]
+      },
+      "subTotal": 599.8
+    }
+  ],
+  "payment": null,
+  "discount": null,
+  "total": 779.6999999999999
+}
+```
+obs: lembrar de formatar os números
+
+### APLICANDO O CUPOM EM UM ORDER JÁ CRIADO:
+
+POST COM A URL:
+http://localhost:8080/orders/1/apply-coupon/2
+Sendo:
+"/{orderId}/apply-coupon/{couponId}"
+
+RESULTADO:
+
+```json
+{
+  "id": 1,
+  "moment": "2025-03-20T16:54:36Z",
+  "orderStatus": "PAID",
+  "client": {
+    "id": 10,
+    "name": "Eduardo Menezes",
+    "email": "eduardo.menezes@email.com",
+    "phone": "11943216543",
+    "password": "E@m456"
+  },
+  "items": [
+    {
+      "quantity": 2,
+      "price": 49.9,
+      "product": {
+        "id": 1,
+        "name": "Camiseta Básica",
+        "description": "Camiseta de algodão, confortável e durável.",
+        "price": 49.9,
+        "categories": [
+          {
+            "id": 1,
+            "name": "Roupas"
+          }
+        ]
+      },
+      "subTotal": 99.8
+    },
+    {
+      "quantity": 1,
+      "price": 179.9,
+      "product": {
+        "id": 3,
+        "name": "Tênis Esportivo",
+        "description": "Tênis para caminhada com ótima aderência.",
+        "price": 179.9,
+        "categories": [
+          {
+            "id": 4,
+            "name": "Esportes"
+          }
+        ]
+      },
+      "subTotal": 179.9
+    }
+  ],
+  "payment": null,
+  "discount": {
+    "id": 2,
+    "code": "WELCOME",
+    "discountPercentage": 10.0
+  },
+  "total": 251.73
+}
+```
+
+### CRIANDO UM ORDER COM CUPOM:
+
+Requisição POST:
+```json
+{
+  "orderStatus": 1,
+  "client": {
+    "id": 2
+  },
+  "items": [
+    {
+      "quantity": 2,
+      "product": {
+        "id": 3
+      }
+    },
+    {
+      "quantity": 1,
+      "product": {
+        "id": 5
+      }
+    }
+  ],
+  "discount": {
+    "id": 2
+  }
+}
+```
+
+RESULTADO:
+```json
+{
+  "id": 5,
+  "moment": "2025-03-21T18:14:08Z",
+  "orderStatus": "PAID",
+  "client": {
+    "id": 2,
+    "name": null,
+    "email": null,
+    "phone": null,
+    "password": null
+  },
+  "items": [
+    {
+      "quantity": 1,
+      "price": 159.9,
+      "product": {
+        "id": 5,
+        "name": "Relógio de Pulso",
+        "description": "Relógio analógico com design moderno.",
+        "price": 159.9,
+        "categories": [
+          {
+            "id": 2,
+            "name": "Eletrônicos"
+          }
+        ]
+      },
+      "subTotal": 159.9
+    },
+    {
+      "quantity": 2,
+      "price": 179.9,
+      "product": {
+        "id": 3,
+        "name": "Tênis Esportivo",
+        "description": "Tênis para caminhada com ótima aderência.",
+        "price": 179.9,
+        "categories": [
+          {
+            "id": 4,
+            "name": "Esportes"
+          }
+        ]
+      },
+      "subTotal": 359.8
+    }
+  ],
+  "payment": null,
+  "discount": {
+    "id": 2,
+    "code": "WELCOME",
+    "discountPercentage": 10.0
+  },
+  "total": 467.73
+}
+```

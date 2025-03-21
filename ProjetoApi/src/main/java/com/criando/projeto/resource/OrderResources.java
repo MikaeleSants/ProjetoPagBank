@@ -1,6 +1,10 @@
 package com.criando.projeto.resource;
 
+import com.criando.projeto.entities.Coupon;
 import com.criando.projeto.entities.Order;
+import com.criando.projeto.entities.OrderItem;
+import com.criando.projeto.entities.Payment;
+import com.criando.projeto.entities.enums.OrderStatus;
 import com.criando.projeto.queryFIlters.OrderQueryFilter;
 import com.criando.projeto.services.OrderServices;
 import com.criando.projeto.services.exceptions.ResourceNotFoundException;
@@ -12,6 +16,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping(value = "/orders")
@@ -54,15 +60,58 @@ public class OrderResources {
         return ResponseEntity.ok().body(obj);
     }
 
-    @PostMapping("/{orderId}/apply-coupon/{couponId}")
-    public ResponseEntity<Order> applyCouponToOrder(
-            @PathVariable Long orderId, @PathVariable Long couponId) {
+    @PatchMapping("/{id}/items")
+    public ResponseEntity<Order> updateOrderItems(@PathVariable Long id, @RequestBody Set<OrderItem> items) {
+        Order updatedOrder = orderServices.updateOrderItems(id, items);
+        return ResponseEntity.ok(updatedOrder);
+    }
+
+    @DeleteMapping("/{orderId}/remove-product/{productId}")
+    public ResponseEntity<Order> removeProductFromOrder(@PathVariable Long orderId, @PathVariable Long productId) {
         try {
-            Order updatedOrder = orderServices.applyCouponToOrder(orderId, couponId);
+            Order updatedOrder = orderServices.removeProductFromOrder(orderId, productId);
             return ResponseEntity.ok().body(updatedOrder);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @PostMapping("/{orderId}/apply-coupon/{couponId}")
+    public ResponseEntity<Order> applyCouponToOrder(
+            @PathVariable Long orderId, @PathVariable Long couponId) {
+        try {
+            Order updatedOrder = orderServices.updateCoupon(orderId, couponId);
+            return ResponseEntity.ok().body(updatedOrder);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{orderId}/remove-coupon")
+    public ResponseEntity<Order> removeCouponFromOrder(@PathVariable Long orderId) {
+        try {
+            // Passar null para remover o cupom
+            Order updatedOrder = orderServices.updateCoupon(orderId, null);
+            return ResponseEntity.ok().body(updatedOrder);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<Order> updateOrderStatus(@PathVariable Long id, @RequestBody Map<String, String> statusUpdate) {
+        String status = statusUpdate.get("orderStatus");
+        Order updatedOrder = orderServices.updateOrderStatus(id, OrderStatus.valueOf(status));
+        return ResponseEntity.ok(updatedOrder);
+    }
+
+    @PatchMapping("/{id}/payment")
+    public ResponseEntity<Order> updateOrderPayment(@PathVariable Long id, @RequestBody Payment payment) {
+        Order updatedOrder = orderServices.updateOrderPayment(id, payment);
+        return ResponseEntity.ok(updatedOrder);
+    }
+
 
 }
