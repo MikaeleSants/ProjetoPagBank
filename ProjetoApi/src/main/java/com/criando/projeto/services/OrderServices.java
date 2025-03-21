@@ -1,6 +1,5 @@
 package com.criando.projeto.services;
 
-import ch.qos.logback.core.net.server.Client;
 import com.criando.projeto.entities.*;
 import com.criando.projeto.entities.enums.OrderStatus;
 import com.criando.projeto.repositories.*;
@@ -86,31 +85,54 @@ public class OrderServices {
         return savedOrder;
     }
 
+    public Order setOrderPayment(Long orderId, Payment payment) {
+        // Buscar o pedido pelo ID
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException(orderId));
+        if (order.getOrderStatus() == OrderStatus.PAID || order.getOrderStatus() == OrderStatus.CANCELED) {
+            throw new IllegalStateException("Não é possível atualizar o pedido com status 'PAID' ou 'CANCELED'");
+        }
 
-    public void delete(Long id) {
+        // Atualiza os dados do pagamento e associa ao pedido
+        payment.setOrder(order);
+        order.setPayment(payment);
 
-        try {
-            Order order = orderRepository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException(id));
+        // Verifica se o pagamento está preenchido e, se sim, altera o status do pedido para "PAID"
+        if (payment.getPaymentMethod() != null) {
+            // Considerando que o pagamento foi concluído se tiver valor e data de pagamento
+            order.setOrderStatus(OrderStatus.PAID); // Ou outro status como "COMPLETED"
+        }
+        // Salva o pedido com os dados atualizados
+        return orderRepository.save(order);
+    }
 
-            // Remove a referência ao pagamento (se existir)
-            if (order.getPayment() != null) {
-                order.setPayment(null);
+    public Order setCoupon(Long orderId, Long couponId) {
+        // Buscar o pedido pelo ID
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException(orderId));
+
+        if (order.getOrderStatus() == OrderStatus.PAID || order.getOrderStatus() == OrderStatus.CANCELED) {
+            throw new IllegalStateException("Não é possível atualizar o pedido com status 'PAID' ou 'CANCELED'");
+        }
+
+        // Se o couponId não for nulo, buscar o cupom no banco de dados
+        if (couponId != null) {
+            Coupon coupon = couponRepository.findById(couponId)
+                    .orElseThrow(() -> new ResourceNotFoundException(couponId));
+
+            // Verificar se o cupom já foi aplicado, caso contrário, aplicar o novo cupom
+            if (order.getDiscount() != null && order.getDiscount().getId().equals(couponId)) {
+                throw new CouponAlreadyAppliedException(couponId);
             }
 
-            // Remove a referência ao cupom (se existir)
+            order.setDiscount(coupon); // Associar o cupom ao pedido
+        } else {
+            // Se couponId for nulo, remover o cupom
             order.setDiscount(null);
-
-            // Limpa os itens do pedido
-            order.getItems().clear();
-            orderRepository.save(order); // Salva a ordem sem itens antes de excluir
-
-            orderRepository.deleteById(id);
-        } catch (EmptyResultDataAccessException e) {
-            throw new ResourceNotFoundException(id);
-        } catch (DataIntegrityViolationException e) {
-            throw new DatabaseException(e.getMessage());
         }
+
+        // Salvar o pedido com as alterações
+        return orderRepository.save(order);
     }
 
     public Order update(Long id, Order obj) {
@@ -119,6 +141,9 @@ public class OrderServices {
             Order entity = orderRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException(id)); // Lança 404 se não encontrar
 
+            if (entity.getOrderStatus() == OrderStatus.PAID || entity.getOrderStatus() == OrderStatus.CANCELED) {
+                throw new IllegalStateException("Não é possível atualizar o pedido com status 'PAID' ou 'CANCELED'");
+            }
             // Atualizar os dados gerais do pedido
             updateData(entity, obj);
 
@@ -130,6 +155,7 @@ public class OrderServices {
     }
 
     private void updateData(Order entity, Order obj) {
+
         // Atualiza o status do pedido
         if (obj.getOrderStatus() != null) {
             entity.setOrderStatus(obj.getOrderStatus());
@@ -161,52 +187,75 @@ public class OrderServices {
     }
 
     // Atualizar ou adicionar itens ao pedido
-    public Order updateOrderItems(Long orderId, Set<OrderItem> items) {
+    public Order updateOrderItems(Long orderId, Set<OrderItem> newItems) {
         // Buscar o pedido pelo ID
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException(orderId));
+        if (order.getOrderStatus() == OrderStatus.PAID || order.getOrderStatus() == OrderStatus.CANCELED) {
+            throw new IllegalStateException("Não é possível atualizar o pedido com status 'PAID' ou 'CANCELED'");
+        }
 
-        // Atualizar os itens do pedido, com a busca do produto no banco
-        updateOrderItems(order, items);
+        // Atualizar ou adicionar os itens ao pedido
+        updateItemsInOrder(order, newItems);
 
-        // Salvar as mudanças no pedido
+        // Salvar o pedido com os itens atualizados ou adicionados
         return orderRepository.save(order);
     }
 
-    // Metodo responsável por atualizar os itens de um pedido
-    public void updateOrderItems(Order order, Set<OrderItem> newItems) {
+    // Metodo responsável por atualizar ou adicionar itens ao pedido
+    private void updateItemsInOrder(Order order, Set<OrderItem> newItems) {
         // Mapeia os itens existentes do pedido para um Map, usando o ID do produto como chave
         Map<Long, OrderItem> existingItemsMap = order.getItems().stream()
                 .collect(Collectors.toMap(item -> item.getProduct().getId(), item -> item));
 
         for (OrderItem newItem : newItems) {
-            // Busca o item existente para o produto
+            // Buscar ou atualizar item
             OrderItem existingItem = existingItemsMap.get(newItem.getProduct().getId());
 
-            // Se o item já existe no pedido, atualiza a quantidade
             if (existingItem != null) {
-                // Atualiza a quantidade e mantém o preço original
+                // Atualiza a quantidade do item existente e mantém o preço original
                 existingItem.setQuantity(existingItem.getQuantity() + newItem.getQuantity());
             } else {
-                // Se o item não existe no pedido, associamos o produto e adicionamos ao pedido
-                // Buscar o produto no banco para garantir que estamos associando um produto válido
-                Product product = productRepository.findById(newItem.getProduct().getId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado: ID " + newItem.getProduct().getId()));
-
-                newItem.setOrder(order);  // Garantir que o OrderItem tenha o pedido associado
-                newItem.setProduct(product);  // Associa o produto ao item
-                newItem.setPrice(product.getPrice());  // Define o preço do produto no pedido
-
-                // Adiciona o item ao pedido
-                order.getItems().add(newItem);
+                // Caso o item não exista, associamos o produto e adicionamos ao pedido
+                addNewItemToOrder(order, newItem);
             }
         }
+    }
+
+    // Metodo auxiliar para adicionar um novo item ao pedido
+    private void addNewItemToOrder(Order order, OrderItem newItem) {
+        // Busca o produto no banco para garantir que estamos associando um produto válido
+        Product product = productRepository.findById(newItem.getProduct().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado: ID " + newItem.getProduct().getId()));
+
+        // Define as informações do novo item
+        newItem.setOrder(order);         // Associa o item ao pedido
+        newItem.setProduct(product);     // Associa o produto ao item
+        newItem.setPrice(product.getPrice());  // Define o preço do produto no pedido
+
+        // Adiciona o item à lista de itens do pedido
+        order.getItems().add(newItem);
+    }
+
+
+    public Order updateOrderStatus(Long id, OrderStatus status) {
+        Order entity = orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(id));
+        if (entity.getOrderStatus() == OrderStatus.PAID || entity.getOrderStatus() == OrderStatus.CANCELED) {
+            throw new IllegalStateException("Não é possível atualizar o pedido com status 'PAID' ou 'CANCELED'");
+        }
+
+        entity.setOrderStatus(status);
+        return orderRepository.save(entity);
     }
 
     public Order removeProductFromOrder(Long orderId, Long productId) {
         // Buscar o pedido pelo ID
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException(orderId));
+        if (order.getOrderStatus() == OrderStatus.PAID || order.getOrderStatus() == OrderStatus.CANCELED) {
+            throw new IllegalStateException("Não é possível atualizar o pedido com status 'PAID' ou 'CANCELED'");
+        }
 
         // Buscar o item do pedido que possui o produto com o ID fornecido
         OrderItem itemToRemove = order.getItems().stream()
@@ -221,50 +270,30 @@ public class OrderServices {
         return orderRepository.save(order);
     }
 
+    public void delete(Long id) {
 
-    public Order updateCoupon(Long orderId, Long couponId) {
-        // Buscar o pedido pelo ID
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException(orderId));
+        try {
+            Order order = orderRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException(id));
 
-        // Se o couponId não for nulo, buscar o cupom no banco de dados
-        if (couponId != null) {
-            Coupon coupon = couponRepository.findById(couponId)
-                    .orElseThrow(() -> new ResourceNotFoundException(couponId));
-
-            // Verificar se o cupom já foi aplicado, caso contrário, aplicar o novo cupom
-            if (order.getDiscount() != null && order.getDiscount().getId().equals(couponId)) {
-                throw new CouponAlreadyAppliedException(couponId);
+            // Remove a referência ao pagamento (se existir)
+            if (order.getPayment() != null) {
+                order.setPayment(null);
             }
 
-            order.setDiscount(coupon); // Associar o cupom ao pedido
-        } else {
-            // Se couponId for nulo, remover o cupom
+            // Remove a referência ao cupom (se existir)
             order.setDiscount(null);
+
+            // Limpa os itens do pedido
+            order.getItems().clear();
+            orderRepository.save(order); // Salva a ordem sem itens antes de excluir
+
+            orderRepository.deleteById(id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new ResourceNotFoundException(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new DatabaseException(e.getMessage());
         }
-
-        // Salvar o pedido com as alterações
-        return orderRepository.save(order);
     }
-
-
-    public Order updateOrderStatus(Long id, OrderStatus status) {
-        Order entity = orderRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id));
-
-        entity.setOrderStatus(status);
-        return orderRepository.save(entity);
-    }
-
-    public Order updateOrderPayment(Long id, Payment payment) {
-        Order entity = orderRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id));
-
-        payment.setOrder(entity); // Garante a associação correta
-        entity.setPayment(payment);
-
-        return orderRepository.save(entity);
-    }
-
 
 }

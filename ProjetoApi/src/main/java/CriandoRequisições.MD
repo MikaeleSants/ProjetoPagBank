@@ -23,6 +23,7 @@ users.forEach(user => {
 
 ## Criando Category
 Depois, dentro do PgAdmin, eu criei as categorias:
+
 INSERT INTO tb_category (name)
 VALUES
     ('Roupas'),
@@ -87,78 +88,17 @@ INSERT INTO tb_product_category (product_id, category_id) VALUES (9, 3);  -- Mó
 -- Cadeira Ergonômica
 INSERT INTO tb_product_category (product_id, category_id) VALUES (10, 3);  -- Móveis
 
-## Inserido dados na Order
--- Inserir pedidos (tb_order)
-INSERT INTO tb_order (moment, order_status, client_id)
-VALUES
-('2025-03-17T10:30:00Z', 1, 1),  -- Pedido 1 (status: WAITING_PAYMENT)
-('2025-03-17T11:00:00Z', 2, 2),  -- Pedido 2 (status: PAID)
-('2025-03-17T12:15:00Z', 3, 3),  -- Pedido 3 (status: SHIPPED)
-('2025-03-17T14:45:00Z', 4, 4),  -- Pedido 4 (status: DELIVERED)
-('2025-03-17T16:00:00Z', 5, 5);  -- Pedido 5 (status: CANCELED)
+### CRIANDO CUPOM:
 
+/cupons
+{
+"code": "DESC40",
+"discountPercentage": 40.0
+}
 
-## Adicionando os Payment:
+### TESTE DE CRIAÇÃO DE ORDER SEM PAYMENT E SEM CUPOM:
 
-No PgAdmin:
-
--- Inserir pagamentos (tb_payment)
-INSERT INTO tb_payment (moment, order_id, payment_method)
-VALUES
-('2025-03-17T10:30:00Z', 1, 1),  -- Pagamento 1 (Método: CREDIT_CARD)
-('2025-03-17T11:00:00Z', 2, 2),  -- Pagamento 2 (Método: DEBIT_CARD)
-('2025-03-17T12:15:00Z', 3, 4),  -- Pagamento 3 (Método: PIX)
-('2025-03-17T14:45:00Z', 4, 3),  -- Pagamento 4 (Método: PAGAR_COM_PAGBANK)
-('2025-03-17T16:00:00Z', 5, 1);  -- Pagamento 5 (Método: CREDIT_CARD)
-
-## Inserindo os Orders Itens:
-
-No PgAdmin:
-
--- Inserir itens de pedido (tb_order_item)
--- Pedido 1 (ID = 1)
-INSERT INTO tb_order_item (order_id, product_id, quantity, price)
-VALUES
-(1, 1, 2, 49.90),  -- 2 Camisetas Básicas
-(1, 2, 1, 99.90);  -- 1 Calça Jeans
-
--- Pedido 2 (ID = 2)
-INSERT INTO tb_order_item (order_id, product_id, quantity, price)
-VALUES
-(2, 3, 1, 179.90),  -- 1 Tênis Esportivo
-(2, 4, 1, 299.90);  -- 1 Mochila de Couro
-
--- Pedido 3 (ID = 3)
-INSERT INTO tb_order_item (order_id, product_id, quantity, price)
-VALUES
-(3, 5, 1, 159.90),  -- 1 Relógio de Pulso
-(3, 6, 2, 299.90);  -- 2 Fones de Ouvido Bluetooth
-
--- Pedido 4 (ID = 4)
-INSERT INTO tb_order_item (order_id, product_id, quantity, price)
-VALUES
-(4, 7, 1, 1999.90),  -- 1 Smartphone
-(4, 8, 1, 5000.00);  -- 1 Laptop Gamer
-
--- Pedido 5 (ID = 5)
-INSERT INTO tb_order_item (order_id, product_id, quantity, price)
-VALUES
-(5, 9, 1, 699.90),  -- 1 Mesa de Escritório
-(5, 10, 1, 399.90);  -- 1 Cadeira Ergonômica
-
-
--- NOTA:
-Caso queria resetar a contagem dos id, usar esse comando:
-ALTER SEQUENCE tb_user_id_seq RESTART WITH 1;
-trocando o tb_user pela tabela especifica
-
-Para verificar o próximo ID que será atribuído automaticamente a uma tabela no MySQL:
-SELECT pg_sequence_last_value('tb_order_id_seq') + 1
-
-# CRIANDO REQUISIÇÕES APÓS CRUD DE ORDER:
-
-### TESTE DE CRIAÇÃO DE ORDER SEM PAYMENT E SEM COUPOM:
-
+/orders
 Requisição POST:
 ```Json
 {
@@ -233,15 +173,14 @@ Resultado:
   ],
   "payment": null,
   "discount": null,
-  "total": 779.6999999999999
+  "total": 779.7
 }
 ```
-obs: lembrar de formatar os números
 
 ### APLICANDO O CUPOM EM UM ORDER JÁ CRIADO:
 
 POST COM A URL:
-http://localhost:8080/orders/1/apply-coupon/2
+/orders/1/apply-coupon/2
 Sendo:
 "/{orderId}/apply-coupon/{couponId}"
 
@@ -306,6 +245,7 @@ RESULTADO:
 ```
 
 ### CRIANDO UM ORDER COM CUPOM:
+/orders
 
 Requisição POST:
 ```json
@@ -392,3 +332,59 @@ RESULTADO:
   "total": 467.73
 }
 ```
+### ADICIONANDO PAGAMENTO AO ORDER
+orders/5/payment
+{"paymentMethod": "PIX"}
+
+### PUT DE ATUALIZAÇÃO GERAL (SEM MEXER NOS PRODUTOS):
+/orders
+```json
+{
+"orderStatus": 1,
+"client": {
+"id": 1
+},
+"discount": {
+"id": 3
+}
+}
+```
+### ADICIONANDO PRODUTOS AO ORDER:
+/orders/8/items
+
+```json
+[
+{
+"product": {
+"id": 1
+},
+"quantity": 3
+},
+{
+"product": {
+"id": 2
+},
+"quantity": 1
+}
+]
+```
+### atualizando o status:
+orders/5/status
+
+```json
+{ "orderStatus": "CANCELED" }
+```
+
+### DELETANDO O CUPOM DE UM PEDIDO:
+/orders/8/remove-coupon
+
+### DELETENDO UM PRODUTO:
+/orders/5/remove-product/3
+
+-- NOTA:
+Caso queria resetar a contagem dos id, usar esse comando:
+ALTER SEQUENCE tb_user_id_seq RESTART WITH 1;
+trocando o tb_user pela tabela especifica
+
+Para verificar o próximo ID que será atribuído automaticamente a uma tabela no MySQL:
+SELECT pg_sequence_last_value('tb_order_id_seq') + 1

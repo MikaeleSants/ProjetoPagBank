@@ -1,10 +1,12 @@
 package com.criando.projeto.entities;
 
 import com.criando.projeto.entities.pk.OrderItemPk;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import org.springframework.format.annotation.NumberFormat;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -19,6 +21,7 @@ public class OrderItem implements Serializable {
     @EmbeddedId
     private OrderItemPk id = new OrderItemPk();
     private Integer quantity;
+    @NumberFormat(pattern = "#,##0.00")
     private Double price;
 
     public OrderItem() {

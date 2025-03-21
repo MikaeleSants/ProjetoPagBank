@@ -1,6 +1,7 @@
 package com.criando.projeto.entities;
 
 import com.criando.projeto.entities.enums.PaymentMethod;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
@@ -15,7 +16,8 @@ public class Payment implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Instant moment;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "GMT")
+    private Instant moment = Instant.now();
     @JsonIgnore
     @OneToOne
     private Order order;

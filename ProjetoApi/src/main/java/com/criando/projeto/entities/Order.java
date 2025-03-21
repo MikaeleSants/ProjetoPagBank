@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Objects;
@@ -131,7 +133,11 @@ public class Order implements Serializable {
             total -= total * (discount.getDiscountPercentage() / 100);
         }
 
-        return total;
+        // Arredondando o total para duas casas decimais
+        BigDecimal totalBigDecimal = new BigDecimal(total).setScale(2, RoundingMode.HALF_UP);
+
+        // Retorna o total com duas casas decimais
+        return totalBigDecimal.doubleValue();
     }
 
 
