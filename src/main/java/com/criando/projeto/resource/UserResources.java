@@ -1,5 +1,6 @@
 package com.criando.projeto.resource;
 
+import com.criando.projeto.entities.Product;
 import com.criando.projeto.entities.User;
 import com.criando.projeto.services.UserServices;
 import jakarta.validation.Valid;
@@ -49,6 +50,12 @@ public class UserResources {
     @PutMapping(value = "/{id}")
     public ResponseEntity<User> update(@PathVariable Long id, @Valid @RequestBody User obj) {
         obj = service.update(id, obj);
+        return ResponseEntity.ok().body(obj);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<User> updatePatch(@PathVariable Long id, @RequestBody User obj) {
+        obj = service.updatePatch(id, obj);
         return ResponseEntity.ok().body(obj);
     }
 }
