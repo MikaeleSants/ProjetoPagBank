@@ -75,11 +75,10 @@ public class Order implements Serializable {
         this.moment = moment;
     }
     public OrderStatus getOrderStatus() {
-        return OrderStatus.valueOf(orderStatus); //convertendo de intenger p OrderStatus
+        return OrderStatus.fromString(this.orderStatus.toString());  // Agora usa fromString, que aceita tanto código quanto nome
     }
     public void setOrderStatus(OrderStatus orderStatus) {
-        if (orderStatus != null) {
-        this.orderStatus = orderStatus.getCode();}
+        this.orderStatus = orderStatus != null ? orderStatus.getCode() : null;  // Armazena o código
     }
     public User getClient() {
         return client;
