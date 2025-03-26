@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "tb_coupon")
@@ -16,7 +17,7 @@ public class Coupon {
     @Column(unique = true)
     @NotBlank
     private String code;
-    @NotBlank
+    @NotNull
     @Min(value = 1, message = "O desconto deve ser no mínimo 1.")
     @Max(value = 100, message = "O desconto não pode ser maior que 100.")
     private Double discountPercentage;
