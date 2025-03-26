@@ -36,12 +36,12 @@ public class OrderServices {
     private UserRepository userRepository;
 
 
-    public List<Order> findAll(Specification<Order> specification) {
-        return orderRepository.findAll(specification);}
 // O metodo recebe um parâmetro Specification<Order>, que representa um critério de filtro para a busca.
 //Ele chama orderRepository.findAll(specification), que delega a busca ao repositório.
 //O metodo retorna uma lista de Order que correspondem aos filtros especificados.
-
+    public List<Order> findOrders(Specification<Order> specification) {
+        return orderRepository.findAll(specification); // Chama o findAll passando a Specification
+    }
 
     public Order findById(Long id) {
         return orderRepository.findById(id)
@@ -57,9 +57,8 @@ public class OrderServices {
         order.setItems(new HashSet<>());
 
         // Se o pedido tiver um cupom, buscar no banco de dados
-        if (order.getDiscount() != null && order.getDiscount().getId() != null) {
-            Coupon coupon = couponRepository.findById(order.getDiscount().getId())
-                    .orElseThrow(() -> new CouponNotFoundException("Cupom não encontrado: ID " + order.getDiscount().getId()));
+        Coupon coupon = applyCouponToOrder(order);
+        if (coupon != null) {
             order.setDiscount(coupon);
         }
 
@@ -93,9 +92,7 @@ public class OrderServices {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
         //verifica se o status é = a PAID ou CANCELED
-        if (order.getOrderStatus() == OrderStatus.PAID || order.getOrderStatus() == OrderStatus.CANCELED) {
-            throw new OrderStatusConflictException("Não é possível atualizar o pedido com status 'PAID' ou 'CANCELED'");
-        }
+        validateOrderStatus(order);
 
         // SE NÃO, atualiza os dados do pagamento e associa ao pedido
         payment.setOrder(order); //Order tem uma referência para Payment.
@@ -115,10 +112,7 @@ public class OrderServices {
         // Buscar o pedido pelo ID
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
-
-        if (order.getOrderStatus() == OrderStatus.PAID || order.getOrderStatus() == OrderStatus.CANCELED) {
-            throw new OrderStatusConflictException("Não é possível atualizar o pedido com status 'PAID' ou 'CANCELED'");
-        }
+        validateOrderStatus(order);
         // Se o couponId não for nulo, buscar o cupom no banco de dados
         if (couponId != null) {
             Coupon coupon = couponRepository.findById(couponId)
@@ -143,9 +137,7 @@ public class OrderServices {
             Order entity = orderRepository.findById(id)
                     .orElseThrow(() -> new OrderNotFoundException(id));
             // Fazendo a validação do status para confirmar se pode mudar
-            if (entity.getOrderStatus() == OrderStatus.PAID || entity.getOrderStatus() == OrderStatus.CANCELED) {
-                throw new OrderStatusConflictException("Não é possível atualizar o pedido com status 'PAID' ou 'CANCELED'");
-            }
+            validateOrderStatus(entity);
             // Atualizar os dados gerais do pedido
             updateData(entity, obj);
             // Salvar o pedido com as atualizações
@@ -165,11 +157,12 @@ public class OrderServices {
                     .orElseThrow(() -> new UserNotFoundException("Cliente não encontrado: ID " + obj.getClient().getId()));
             entity.setClient(client);
         }
-        // Atualiza o cupom, se for passado, buscando no banco
         if (obj.getDiscount() != null && obj.getDiscount().getId() != null) {
             Coupon coupon = couponRepository.findById(obj.getDiscount().getId())
                     .orElseThrow(() -> new CouponNotFoundException("Cupom não encontrado: ID " + obj.getDiscount().getId()));
-            entity.setDiscount(coupon);
+            entity.setDiscount(coupon); // Atualiza o cupom no pedido
+        } else {
+            entity.setDiscount(null); // Se não passar um cupom, limpa o cupom
         }
     }
 
@@ -179,9 +172,7 @@ public class OrderServices {
         // Buscar o pedido pelo ID
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
-        if (order.getOrderStatus() == OrderStatus.PAID || order.getOrderStatus() == OrderStatus.CANCELED) {
-            throw new OrderStatusConflictException("Não é possível atualizar o pedido com status 'PAID' ou 'CANCELED'");
-        }
+        validateOrderStatus(order);
         // Atualizar ou adicionar os itens ao pedido
         updateItemsInOrder(order, newItems);
 
@@ -241,9 +232,7 @@ public class OrderServices {
     public Order updateOrderStatus(Long id, OrderStatus status) {
         Order entity = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id));
-        if (entity.getOrderStatus() == OrderStatus.PAID || entity.getOrderStatus() == OrderStatus.CANCELED) {
-            throw new OrderStatusConflictException("Não é possível atualizar o pedido com status 'PAID' ou 'CANCELED'");
-        }
+        validateOrderStatus(entity);
 
         entity.setOrderStatus(status);
         return orderRepository.save(entity);
@@ -253,9 +242,7 @@ public class OrderServices {
         // Buscar o pedido pelo ID
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
-        if (order.getOrderStatus() == OrderStatus.PAID || order.getOrderStatus() == OrderStatus.CANCELED) {
-            throw new OrderStatusConflictException("Não é possível atualizar o pedido com status 'PAID' ou 'CANCELED'");
-        }
+        validateOrderStatus(order);
 
         // Buscar o item do pedido que possui o produto com o ID fornecido
         OrderItem itemToRemove = order.getItems().stream()
@@ -301,5 +288,20 @@ public class OrderServices {
             throw new DatabaseException(e.getMessage());
         }
     }
+
+    private void validateOrderStatus(Order order) {
+        if (order.getOrderStatus() == OrderStatus.PAID || order.getOrderStatus() == OrderStatus.CANCELED) {
+            throw new OrderStatusConflictException("Não é possível atualizar o pedido com status 'PAID' ou 'CANCELED'");
+        }
+    }
+
+    private Coupon applyCouponToOrder(Order order) {
+        if (order.getDiscount() != null && order.getDiscount().getId() != null) {
+            return couponRepository.findById(order.getDiscount().getId())
+                    .orElseThrow(() -> new CouponNotFoundException("Cupom não encontrado: ID " + order.getDiscount().getId()));
+        }
+        return null;
+    }
+
 
 }

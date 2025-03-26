@@ -5,10 +5,13 @@ import com.criando.projeto.entities.OrderItem;
 import com.criando.projeto.entities.Payment;
 import com.criando.projeto.entities.enums.OrderStatus;
 import com.criando.projeto.queryFIlters.OrderQueryFilter;
+import com.criando.projeto.repositories.OrderRepository;
 import com.criando.projeto.services.OrderServices;
 import com.criando.projeto.services.exceptions.ResourceNotFoundException;
+import com.criando.projeto.specifications.OrderSpec;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -26,14 +29,24 @@ public class OrderResources {
 
     //responseEntity é um tipo do spring para retornar respostas de requisicoes web
     @GetMapping
-    public ResponseEntity<List<Order>> findAll(OrderQueryFilter filter) {
-        List<Order> list = orderServices.findAll(filter.toSpecification());
-        return ResponseEntity.ok().body(list);
-    }
+    public ResponseEntity<List<Order>> findOrders(@RequestParam(required = false) Long userId,
+                                                  @RequestParam(required = false) String orderStatus) {
 
-    //aqui eu vou botar na url o valor do id do usuario pra buscar, pra dizer que a minha url
-    //recebe um paramentro, eu uso o que tem em ({}), em seguida botar uma annotation @PathVariable
-    //ao lado da variavel do paramentro do metodo
+        // Cria a Specification de forma condicional
+        Specification<Order> spec = Specification.where(OrderSpec.byUserId(userId))
+                .and(OrderSpec.orderStatusEquals(orderStatus));
+
+        // Chama o serviço para buscar os pedidos com a Specification
+        List<Order> orders = orderServices.findOrders(spec);
+        return ResponseEntity.ok().body(orders);
+    }
+    /*
+    GET /orders
+    GET /orders?userId=1
+    GET /orders?orderStatus=PAID
+     */
+
+
     @GetMapping(value = "/{id}")
     public ResponseEntity<Order> findById(@PathVariable Long id) {
         Order obj = orderServices.findById(id);
