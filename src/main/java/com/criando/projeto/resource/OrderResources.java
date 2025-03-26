@@ -51,7 +51,7 @@ public class OrderResources {
     public ResponseEntity<Order> applyCouponToOrder(
             @PathVariable Long orderId, @PathVariable Long couponId) {
         try {
-            Order updatedOrder = orderServices.setCoupon(orderId, couponId);
+            Order updatedOrder = orderServices.setOrDeleteCoupon(orderId, couponId);
             return ResponseEntity.ok().body(updatedOrder);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.notFound().build();
@@ -91,7 +91,7 @@ public class OrderResources {
     public ResponseEntity<Order> removeCouponFromOrder(@PathVariable Long orderId) {
         try {
             // Passar null para remover o cupom
-            Order updatedOrder = orderServices.setCoupon(orderId, null);
+            Order updatedOrder = orderServices.setOrDeleteCoupon(orderId, null);
             return ResponseEntity.ok().body(updatedOrder);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.notFound().build();

@@ -23,7 +23,7 @@ public class UserServices {
     private UserRepository userRepository;
 
 
-
+    // O metodo findAll(), findbyId vem do JpaRepository
     public List<User> findAll() {
         return userRepository.findAll();
     }
@@ -36,15 +36,15 @@ public class UserServices {
     }
     public void delete(Long id) {
         try {
-        userRepository.deleteById(id); } catch (EmptyResultDataAccessException e)
-        {throw new ResourceNotFoundException(id);} catch (DataIntegrityViolationException e)
-        {throw new DatabaseException(e.getMessage());}
+        userRepository.deleteById(id); }
+        catch (EmptyResultDataAccessException e) {throw new ResourceNotFoundException(id);} //Você tentou excluir um usuário com um id que não foi encontrado.
+        catch (DataIntegrityViolationException e) {throw new DatabaseException(e.getMessage());} // Essa exceção ocorre quando a tentativa de exclusão viola uma restrição de integridade no banco de dados. Isso pode acontecer, por exemplo, quando um registro está sendo referenciado por outro
     }
     //precisei atualizar esse trecho com a ajuda do chatgpt, porque o do curso estava desatualizado
     public User update(Long id, User obj) {
         try {
             User entity = userRepository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException(id)); // Lança 404 se não encontrar
+                    .orElseThrow(() -> new ResourceNotFoundException(id));
             updateData(entity, obj);
             return userRepository.save(entity);
         } catch (ResourceNotFoundException e) {

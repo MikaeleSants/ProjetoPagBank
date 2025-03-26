@@ -38,7 +38,6 @@ public class Order implements Serializable {
      será replicada automaticamente para Payment.
      Se apagar um Order, o Payment correspondente também será apagado.
      Se salvar um Order, o Payment associado será salvo automaticamente. */
-
     @OneToOne
     @JoinColumn(name = "coupon_id", nullable = true)
     private Coupon discount;
@@ -100,6 +99,8 @@ public class Order implements Serializable {
     public void setItems(Set<OrderItem> items) {
         this.items = (items != null) ? items : new HashSet<>();
     }
+    //Se items não for null, ele simplesmente atribui o valor recebido à variável this.items.
+    //Se items for null, ele cria um novo HashSet<>() vazio, evitando NullPointerException.
     public void addItem(OrderItem item) {
         if (item != null) {
             this.items.add(item);
@@ -134,7 +135,9 @@ public class Order implements Serializable {
         }
 
         // Arredondando o total para duas casas decimais
-        BigDecimal totalBigDecimal = new BigDecimal(total).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal totalBigDecimal = new BigDecimal(String.valueOf(total)).setScale(2, RoundingMode.DOWN);
+        //Usar new BigDecimal(double) pode não ser preciso devido a problemas internos de representação de ponto flutuante (double).
+        // O recomendado é sempre converter double para String antes de criar um BigDecimal
 
         // Retorna o total com duas casas decimais
         return totalBigDecimal.doubleValue();

@@ -21,8 +21,6 @@ public class UserResources {
     //responseEntity é um tipo do spring para retornar respostas de requisicoes web
     @GetMapping
     public ResponseEntity<List<User>> findAll () {
-        //User u = new User(1L, "Maria", "maria@gmail.com", "99999999", "12345");
-        //o primeiro atributo é do tipo Long, ai precisa por o L na frente
         List<User> list = service.findAll();
         return ResponseEntity.ok().body(list);
     }

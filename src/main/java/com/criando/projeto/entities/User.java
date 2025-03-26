@@ -98,6 +98,10 @@ public class User implements Serializable {
         this.password = password;
     }
 
+    public List<Order> getOrders() {
+        return orders;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -110,8 +114,6 @@ public class User implements Serializable {
         return Objects.hashCode(id);
     }
 
-    public List<Order> getOrders() {
-        return orders;
-    }
+
 
 }
