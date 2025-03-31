@@ -2,6 +2,7 @@ package com.criando.projeto.security;
 
 import com.criando.projeto.entities.User;
 import com.criando.projeto.repositories.UserRepository;
+import com.criando.projeto.services.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -24,7 +25,7 @@ public class UserSecurity {
 
         // Busca o usuário pelo e-mail
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
 
         // Se for ADMIN, permite o acesso
         if ("ADMIN".equals(user.getRole().name())) {
