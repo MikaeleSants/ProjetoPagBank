@@ -62,4 +62,6 @@ public class StandardError implements Serializable {
     public void setPath(String path) {
         this.path = path;
     }
+
+    //representando um erro geral que pode ser retornado em qualquer tipo de exceção, com informações de timestamp, status, error, message e path. Não é necessário mudar nada aqui. Essa classe está sendo usada como a base para os outros tipos de erro, como ValidationError, e pode ser útil para qualquer outro tipo de erro que você queira registrar.
 }

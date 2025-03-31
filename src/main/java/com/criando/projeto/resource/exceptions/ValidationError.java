@@ -20,4 +20,6 @@ public class ValidationError extends StandardError {
     public void addError(String fieldName, String message) {
         errors.add(new FieldMessage(fieldName, message));
     }
+
+    //herda de StandardError e adiciona uma lista de erros de campo, permitindo adicionar múltiplos erros. Ela está configurada para ser usada especificamente em casos de validação, como erros que podem ocorrer em múltiplos campos durante a validação do corpo da requisição.
 }

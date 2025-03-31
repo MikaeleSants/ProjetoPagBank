@@ -5,7 +5,6 @@ import com.criando.projeto.entities.enums.OrderStatus;
 import com.criando.projeto.queryFIlters.OrderQueryFilter;
 import com.criando.projeto.repositories.*;
 import com.criando.projeto.services.exceptions.*;
-import com.criando.projeto.specifications.OrderSpec;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -65,11 +64,11 @@ public class OrderServices {
 
     // Método para obter um pedido específico
     public Order findById(Long id, Authentication authentication) {
-        Order order = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
+        Order order = orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado" + id));
 
         // Verifica se o usuário tem permissão para acessar esse pedido
         if (!authenticationFacade.isAdmin(authentication) && !authenticationFacade.isSameUser(order.getClient().getId())) {
-            throw new RuntimeException("Acesso negado");
+            throw new AccessDeniedException("Você não tem permissão para acessar este pedido.");
         }
 
         return order;
@@ -81,7 +80,7 @@ public class OrderServices {
 
         // Busca o usuário pelo e-mail
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado" + email));
 
         // Define o ID do usuário autenticado na ordem
         order.setClient(user);
@@ -105,7 +104,7 @@ public class OrderServices {
         orderItems.forEach(orderItem -> {
             // Buscar o produto no banco de dados
             Product product = productRepository.findById(orderItem.getProduct().getId())
-                    .orElseThrow(() -> new RuntimeException("Produto não encontrado: ID " + orderItem.getProduct().getId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado: ID " + orderItem.getProduct().getId()));
 
             // Atualizar os dados do OrderItem com os dados do produto encontrado, de acordo com os atributos do order item
             orderItem.setOrder(savedOrder);
@@ -126,9 +125,13 @@ public class OrderServices {
     public Order setOrderPayment(Long orderId, Payment payment) {
         // Buscar o pedido pelo ID
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException(orderId));
+                .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado. ID:" + orderId));
         //verifica se o status é = a PAID ou CANCELED
         validateOrderStatus(order);
+
+        if (order.getOrderStatus() == null || !isValidOrderStatus(order.getOrderStatus())) {
+            throw new InvalidOrderStatusException(order.getOrderStatus().toString(), "O status fornecido não é válido.");
+        }
 
         // SE NÃO, atualiza os dados do pagamento e associa ao pedido
         payment.setOrder(order); //Order tem uma referência para Payment.
@@ -147,12 +150,12 @@ public class OrderServices {
     public Order setOrDeleteCoupon(Long orderId, Long couponId) {
         // Buscar o pedido pelo ID
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException(orderId));
+                .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado. ID:" + orderId));
         validateOrderStatus(order);
         // Se o couponId não for nulo, buscar o cupom no banco de dados
         if (couponId != null) {
             Coupon coupon = couponRepository.findById(couponId)
-                    .orElseThrow(() -> new CouponNotFoundException("Cupom não encontrado: ID " + couponId));
+                    .orElseThrow(() -> new ResourceNotFoundException("Cupom não encontrado: ID " + couponId));
             // Verificar se o cupom já foi aplicado, caso contrário, aplicar o novo cupom
             if (order.getDiscount() != null && order.getDiscount().getId().equals(couponId)) {
                 throw new CouponAlreadyAppliedException(couponId);
@@ -171,7 +174,7 @@ public class OrderServices {
         try {
             // Buscar o pedido pelo ID
             Order entity = orderRepository.findById(id)
-                    .orElseThrow(() -> new OrderNotFoundException(id));
+                    .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado. ID:" + id));
             // Fazendo a validação do status para confirmar se pode mudar
             validateOrderStatus(entity);
             // Atualizar os dados gerais do pedido
@@ -185,17 +188,20 @@ public class OrderServices {
     private void updateData(Order entity, Order obj) {
         // Atualiza o status do pedido
         if (obj.getOrderStatus() != null) {
+            if (!isValidOrderStatus(obj.getOrderStatus())) {
+                throw new InvalidOrderStatusException(obj.getOrderStatus().toString(), "O status fornecido não é válido.");
+            }
             entity.setOrderStatus(obj.getOrderStatus());
         }
         // Atualiza o cliente do pedido, buscando no banco se necessário
         if (obj.getClient() != null && obj.getClient().getId() != null) {
             User client = userRepository.findById(obj.getClient().getId())
-                    .orElseThrow(() -> new UserNotFoundException("Cliente não encontrado: ID " + obj.getClient().getId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado: ID " + obj.getClient().getId()));
             entity.setClient(client);
         }
         if (obj.getDiscount() != null && obj.getDiscount().getId() != null) {
             Coupon coupon = couponRepository.findById(obj.getDiscount().getId())
-                    .orElseThrow(() -> new CouponNotFoundException("Cupom não encontrado: ID " + obj.getDiscount().getId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Cupom não encontrado: ID " + obj.getDiscount().getId()));
             entity.setDiscount(coupon); // Atualiza o cupom no pedido
         } else {
             entity.setDiscount(null); // Se não passar um cupom, limpa o cupom
@@ -207,7 +213,7 @@ public class OrderServices {
     public Order updateOrderItems(Long orderId, Set<OrderItem> newItems) {
         // Buscar o pedido pelo ID
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException(orderId));
+                .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado. ID:" + orderId));
         validateOrderStatus(order);
         // Atualizar ou adicionar os itens ao pedido
         updateItemsInOrder(order, newItems);
@@ -253,7 +259,7 @@ public class OrderServices {
     private void addNewItemToOrder(Order order, OrderItem newItem) {
         // Busca o produto no banco para garantir que estamos associando um produto válido
         Product product = productRepository.findById(newItem.getProduct().getId())
-                .orElseThrow(() -> new ProductNotFoundException("Produto não encontrado: ID " + newItem.getProduct().getId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado: ID " + newItem.getProduct().getId()));
 
         // Define as informações do novo item
         newItem.setOrder(order);         // Associa o item ao pedido
@@ -267,8 +273,12 @@ public class OrderServices {
 
     public Order updateOrderStatus(Long id, OrderStatus status) {
         Order entity = orderRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id));
+                .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado. ID:" + id));;
         validateOrderStatus(entity);
+
+        if (status == null || !isValidOrderStatus(status)) {
+            throw new InvalidOrderStatusException(status.toString(), "O status fornecido não é válido.");
+        }
 
         entity.setOrderStatus(status);
         return orderRepository.save(entity);
@@ -277,7 +287,7 @@ public class OrderServices {
     public Order removeProductFromOrder(Long orderId, Long productId) {
         // Buscar o pedido pelo ID
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException(orderId));
+                .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado. ID:" + orderId));
         validateOrderStatus(order);
 
         // Buscar o item do pedido que possui o produto com o ID fornecido
@@ -291,7 +301,7 @@ public class OrderServices {
                 //Esse filtro mantém apenas o item (produto) que tem o mesmo ID do produto fornecido.
                 .findFirst()
                 //.findFirst() retorna o primeiro elemento que corresponde ao filtro aplicado. Como o stream é filtrado para buscar um item específico (pelo ID do produto), o método findFirst irá retornar o primeiro item que corresponde ao filtro, ou seja, o item encontrado ou Optional.empty() caso o item não seja encontrado.
-                .orElseThrow(() -> new ProductNotFoundException("Produto não encontrado no pedido"));
+                .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado no pedido"));
 
         // Remover o item do pedido
         order.getItems().remove(itemToRemove);
@@ -303,7 +313,7 @@ public class OrderServices {
 
         try {
             Order order = orderRepository.findById(id)
-                    .orElseThrow(() -> new OrderNotFoundException(id));
+                    .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado. ID:" + id));
 
             // Remove a referência ao pagamento (se existir)
             if (order.getPayment() != null) {
@@ -325,19 +335,27 @@ public class OrderServices {
         }
     }
 
-    private void validateOrderStatus(Order order) {
-        if (order.getOrderStatus() == OrderStatus.PAID || order.getOrderStatus() == OrderStatus.CANCELED) {
-            throw new OrderStatusConflictException("Não é possível atualizar o pedido com status 'PAID' ou 'CANCELED'");
-        }
-    }
-
     private Coupon applyCouponToOrder(Order order) {
+        if (order == null) {
+            throw new ResourceNotFoundException("Pedido não encontrado.");
+        }
         if (order.getDiscount() != null && order.getDiscount().getId() != null) {
             return couponRepository.findById(order.getDiscount().getId())
-                    .orElseThrow(() -> new CouponNotFoundException("Cupom não encontrado: ID " + order.getDiscount().getId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Cupom não encontrado: ID " + order.getDiscount().getId()));
         }
         return null;
     }
 
 
+    // Método auxiliar para verificar se o status é válido
+    private boolean isValidOrderStatus(OrderStatus status) {
+        // Verifique se o status fornecido é um valor válido de OrderStatus
+        return status == OrderStatus.WAITING_PAYMENT || status == OrderStatus.PAID || status == OrderStatus.CANCELED;
+    }
+    // Método auxiliar para verificar se o pedido está finalizado no sistema
+    private void validateOrderStatus(Order order) {
+        if (order.getOrderStatus() == OrderStatus.PAID || order.getOrderStatus() == OrderStatus.CANCELED) {
+            throw new OrderStatusConflictException("Não é possível atualizar o pedido com status 'PAID' ou 'CANCELED'");
+        }
+    }
 }

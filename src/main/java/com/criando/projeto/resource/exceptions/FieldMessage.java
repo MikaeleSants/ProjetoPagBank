@@ -28,4 +28,6 @@ public class FieldMessage implements Serializable {
     public void setMessage(String message) {
         this.message = message;
     }
+
+    //armazenar os detalhes de um erro específico de um campo. Não vejo necessidade de mudanças aqui, já que ela está mantendo o nome do campo e a mensagem de erro, que são essenciais para erros de validação.
 }

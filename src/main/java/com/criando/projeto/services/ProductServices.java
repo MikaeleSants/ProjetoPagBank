@@ -4,8 +4,6 @@ import com.criando.projeto.entities.Category;
 import com.criando.projeto.entities.Product;
 import com.criando.projeto.repositories.CategoryRepository;
 import com.criando.projeto.repositories.ProductRepository;
-import com.criando.projeto.services.exceptions.CategoryNotFoundException;
-import com.criando.projeto.services.exceptions.ProductNotFoundException;
 import com.criando.projeto.services.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -29,12 +27,12 @@ public class ProductServices {
 
     public Product findById(Long id) {
         Optional <Product> obj =  productRepository.findById(id);
-        return obj.get();
+        return obj.orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado. ID: " + id));
     }
     public Product insert(Product product, Long categoryId) {
         // Buscar a categoria pelo ID
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new CategoryNotFoundException(categoryId));
+                .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada. ID: " + categoryId));
 
         // Associa a categoria ao produto
         product.getCategories().add(category); // Adiciona a categoria ao conjunto de categorias do produto
@@ -48,7 +46,7 @@ public class ProductServices {
     public Product update(Long id, Product obj) {
         try {
             Product entity = productRepository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException(id)); // Lança 404 se não encontrar
+                    .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado. ID: " + id)); // Lança 404 se não encontrar
             updateData(entity, obj);
             return productRepository.save(entity);
         } catch (ResourceNotFoundException e) {
@@ -64,7 +62,7 @@ public class ProductServices {
 
     public Product updatePartial(Long id, Product newData) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException("Produto não encontrado: ID " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado: ID " + id));
 
         // Atualiza apenas os campos não nulos
         if (newData.getName() != null) {
@@ -92,7 +90,7 @@ public class ProductServices {
         try {
             productRepository.deleteById(id);
         } catch (EmptyResultDataAccessException e) {
-            throw new ProductNotFoundException("Produto não encontrado: ID " + id);
+            throw new ResourceNotFoundException("Produto não encontrado: ID " + id);
         }
     }
 }

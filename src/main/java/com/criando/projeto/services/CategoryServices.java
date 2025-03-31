@@ -25,7 +25,7 @@ public class CategoryServices {
 
     public Category findById(Long id) {
         Optional <Category> obj =  categoryRepository.findById(id);
-        return obj.get();
+        return obj.orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada! ID" + id));
     }
 
     public Category insert(Category obj) {
@@ -36,7 +36,7 @@ public class CategoryServices {
     public Category update(Long id, Category obj) {
         try {
             Category entity = categoryRepository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException(id));
+                    .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada! ID" + id));
             updateData(entity, obj);
             return categoryRepository.save(entity);
         } catch (ResourceNotFoundException e) {

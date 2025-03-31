@@ -45,7 +45,7 @@ public class CouponServices {
     public Coupon update(Long id, Coupon obj) {
         try {
             Coupon entity = couponRepository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException(id));
+                    .orElseThrow(() -> new ResourceNotFoundException("Cupom não encontrado: ID " + id));
             updateData(entity, obj);
             return couponRepository.save(entity);
         } catch (ResourceNotFoundException e) {

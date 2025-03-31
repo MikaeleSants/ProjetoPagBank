@@ -4,7 +4,7 @@ public class DatabaseException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     public DatabaseException() {
-        super("Erro no banco de dados."); // Mensagem padrão
+        super("Não é possível excluir o usuário pois há referências a ele em outras tabelas."); // Mensagem padrão
     }
 
     public DatabaseException(String message) {
