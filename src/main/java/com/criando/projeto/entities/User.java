@@ -1,5 +1,6 @@
 package com.criando.projeto.entities;
 
+import com.criando.projeto.entities.enums.UserRole;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -33,12 +34,14 @@ public class User implements Serializable {
     @Size(min = 9, max = 17, message = "O telefone deve ter entre 3 e 17 caracteres.")
     private String phone;
     @NotBlank(message = "A senha não pode estar vazia.")
-    @Size(min = 3, max = 8, message = "A senha deve ter entre 3 e 8 caracteres.")
+    /*@Size(min = 3, max = 8, message = "A senha deve ter entre 3 e 8 caracteres.")
     @Pattern(
             regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$",
             message = "A senha deve conter pelo menos uma letra, um número e um símbolo especial (@$!%*?&)."
-    )
+    )*/
     private String password;
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
     /* a relação entre user e order é de one to many, o que signifca que
      * será um user para varios pedidos, para indicar esse tipo de relação como chave estrageira
      * para o JPA, se usa a annotation @OneToMany(mappedBy: "o nome de como ele foi declarado")
@@ -50,12 +53,13 @@ public class User implements Serializable {
     public User() {
     }
 
-    public User(Long id, String name, String email, String phone, String password) {
+    public User(Long id, String name, String email, String phone, String password, UserRole role) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.phone = phone;
         this.password = password;
+        this.role = role;
     }
 
     public Long getId() {
@@ -96,6 +100,18 @@ public class User implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public UserRole getRole() {
+        return role;
+    }
+
+    public void setRole(UserRole role) {
+        this.role = role;
+    }
+
+    public void setOrders(List<Order> orders) {
+        this.orders = orders;
     }
 
     public List<Order> getOrders() {

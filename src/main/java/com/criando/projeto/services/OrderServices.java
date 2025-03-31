@@ -2,12 +2,16 @@ package com.criando.projeto.services;
 
 import com.criando.projeto.entities.*;
 import com.criando.projeto.entities.enums.OrderStatus;
+import com.criando.projeto.queryFIlters.OrderQueryFilter;
 import com.criando.projeto.repositories.*;
 import com.criando.projeto.services.exceptions.*;
+import com.criando.projeto.specifications.OrderSpec;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -34,22 +38,54 @@ public class OrderServices {
     private ProductRepository productRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private AuthenticationFacade authenticationFacade; // Para pegar o usuário logado
 
 
-// O metodo recebe um parâmetro Specification<Order>, que representa um critério de filtro para a busca.
+    // O metodo recebe um parâmetro Specification<Order>, que representa um critério de filtro para a busca.
 //Ele chama orderRepository.findAll(specification), que delega a busca ao repositório.
 //O metodo retorna uma lista de Order que correspondem aos filtros especificados.
-    public List<Order> findOrders(Specification<Order> specification) {
-        return orderRepository.findAll(specification); // Chama o findAll passando a Specification
+    // Metodo para buscar pedidos com base na Specification (já levando em conta a lógica de filtro)
+    public List<Order> findOrders(OrderQueryFilter filter) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // Se o usuário for do role USER, ele só pode ver os próprios pedidos
+        if (authenticationFacade.isUser(authentication)) {
+            // Define automaticamente o userId para o id do usuário logado
+            Long userId = authenticationFacade.getAuthenticatedUser().getId();
+            filter.setUserId(userId);
+        }
+
+        // Gera a Specification a partir do filtro
+        Specification<Order> spec = filter.toSpecification();
+
+        // Busca os pedidos com base na Specification
+        return orderRepository.findAll(spec);
     }
 
-    public Order findById(Long id) {
-        return orderRepository.findById(id)
-                .orElseThrow(() -> new OrderNotFoundException(id));
-    }
+    // Método para obter um pedido específico
+    public Order findById(Long id, Authentication authentication) {
+        Order order = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
 
+        // Verifica se o usuário tem permissão para acessar esse pedido
+        if (!authenticationFacade.isAdmin(authentication) && !authenticationFacade.isSameUser(order.getClient().getId())) {
+            throw new RuntimeException("Acesso negado");
+        }
+
+        return order;
+    }
 
     public Order insert(Order order) {
+        // Obtém o e-mail do usuário autenticado
+        String email = authenticationFacade.getAuthenticatedUserEmail();
+
+        // Busca o usuário pelo e-mail
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        // Define o ID do usuário autenticado na ordem
+        order.setClient(user);
+
         // Guarda os itens enviados na requisição,O var no Java é um tipo inferido introduzido no Java 10. Ele permite que o compilador determine automaticamente o tipo da variável com base no valor atribuído.
         var orderItems = order.getItems();
 

@@ -5,17 +5,15 @@ import com.criando.projeto.entities.OrderItem;
 import com.criando.projeto.entities.Payment;
 import com.criando.projeto.entities.enums.OrderStatus;
 import com.criando.projeto.queryFIlters.OrderQueryFilter;
-import com.criando.projeto.repositories.OrderRepository;
 import com.criando.projeto.services.OrderServices;
 import com.criando.projeto.services.exceptions.ResourceNotFoundException;
-import com.criando.projeto.specifications.OrderSpec;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -27,17 +25,12 @@ public class OrderResources {
     @Autowired
     private OrderServices orderServices;
 
+
     //responseEntity é um tipo do spring para retornar respostas de requisicoes web
     @GetMapping
-    public ResponseEntity<List<Order>> findOrders(@RequestParam(required = false) Long userId,
-                                                  @RequestParam(required = false) String orderStatus) {
-
-        // Cria a Specification de forma condicional
-        Specification<Order> spec = Specification.where(OrderSpec.byUserId(userId))
-                .and(OrderSpec.orderStatusEquals(orderStatus));
-
-        // Chama o serviço para buscar os pedidos com a Specification
-        List<Order> orders = orderServices.findOrders(spec);
+    public ResponseEntity<List<Order>> findOrders(OrderQueryFilter filter) {
+        // Chama o serviço para buscar os pedidos
+        List<Order> orders = orderServices.findOrders(filter);
         return ResponseEntity.ok().body(orders);
     }
     /*
@@ -47,10 +40,10 @@ public class OrderResources {
      */
 
 
-    @GetMapping(value = "/{id}")
-    public ResponseEntity<Order> findById(@PathVariable Long id) {
-        Order obj = orderServices.findById(id);
-        return ResponseEntity.ok().body(obj);
+    @GetMapping("/{id}")
+    public ResponseEntity<Order> getOrderById(@PathVariable Long id, Authentication authentication) {
+        Order order = orderServices.findById(id, authentication);
+        return ResponseEntity.ok(order);
     }
 
     @PostMapping

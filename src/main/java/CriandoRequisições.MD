@@ -388,3 +388,10 @@ trocando o tb_user pela tabela especifica
 
 Para verificar o próximo ID que será atribuído automaticamente a uma tabela no MySQL:
 SELECT pg_sequence_last_value('tb_order_id_seq') + 1
+
+
+admin@example.com
+Mik@232
+
+"paloma.souza@email.com"
+"PA@c123"
