@@ -25,13 +25,6 @@ public class Product implements Serializable {
     @NotNull
     @Positive
     private Double price;
-    /*
-    * @ManyToMany // Indica um relacionamento muitos-para-muitos entre produtos e categorias
-    * @JoinTable(name = "tb_product_category", // Define o nome da tabela intermediária no banco de dados
-    * joinColumns = @JoinColumn(name = "product_id"), // Define a chave estrangeira que referencia a tabela de produtos
-    * inverseJoinColumns = @JoinColumn(name = "category_id") // Define a chave estrangeira que referencia a tabela de categorias)
-    * Isso significa que um Produto pode estar em várias Categorias, e uma Categoria pode conter vários Produtos,
-    * sendo gerenciada pela tabela intermediária tb_product_category.*/
     @ManyToMany
     @JoinTable(name = "tb_product_category",
             joinColumns = @JoinColumn(name = "product_id"),
@@ -42,7 +35,7 @@ public class Product implements Serializable {
 
     public Product() {
     }
-    //n bota a coleção dentro do construtor pq ela já ta sendo instanciada ali em cima
+
     public Product(Long id, String name, String description, Double price) {
         this.id = id;
         this.name = name;

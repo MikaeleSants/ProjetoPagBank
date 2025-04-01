@@ -195,9 +195,7 @@ public class SecurityConfig {
 
         return http.build();
     }
-    /* O metodo cria um bean (@Bean) que fornece uma instância do BCryptPasswordEncoder.
-    Esse encoder é utilizado para criptografar e verificar senhas.
-    O Bean permite que guarde a logica desse metodo aqui e possa reutiliza-lo no em outros pontos do projeto*/
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

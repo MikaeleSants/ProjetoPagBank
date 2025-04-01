@@ -54,7 +54,6 @@ public class UserResources {
             // Senão, define como "USER"
             user.setRole(UserRole.USER);
         }
-
         user = service.insert(user);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(user.getId()).toUri();
     return ResponseEntity.created(uri).body(user);}
@@ -71,10 +70,10 @@ public class UserResources {
         return ResponseEntity.ok(updatedUser);
     }
 
-
-//    @PostMapping("/update-passwords")
-//    public ResponseEntity<Void> updatePasswords() {
-//        service.updatePasswordsForAllUsers();  // Chama o metodo para atualizar todas as senhas
-//        return ResponseEntity.noContent().build();  // Retorna uma resposta 204 sem conteúdo
-//    }
+//METODO PARA CRIPTOGRAFAR SENHAS NO BANCO:
+/*    @PostMapping("/update-passwords")
+        public ResponseEntity<Void> updatePasswords() {
+        service.updatePasswordsForAllUsers();  // Chama o metodo para atualizar todas as senhas
+        return ResponseEntity.noContent().build();  // Retorna uma resposta 204 sem conteúdo
+   }*/
 }

@@ -5,7 +5,7 @@ import lombok.Data;
 import org.springframework.data.jpa.domain.Specification;
 
 @Data
-//A anotação @Data do Lombok gera automaticamente vários métodos, tipo os get e set
+
 public class ProductQueryFilter {
     private String name;
     private String categoryName;

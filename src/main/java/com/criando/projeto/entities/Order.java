@@ -23,10 +23,6 @@ public class Order implements Serializable {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "GMT")
     private Instant moment;
     private Integer orderStatus;
-    /* a relação entre order e user é de manytoone, o que signifca que
-    * serão varios pedidos por pessoas, para indicar esse tipo de relação como chave estrageira
-    * para o JPA, se usa a annotation @ManytoOne e o @JoinColumn para adicionar
-    * mais uma coluna com essa associação na tabela e dar um nome pra ela*/
     @ManyToOne
     @JoinColumn(name = "client_id")
     private User client;
@@ -34,10 +30,6 @@ public class Order implements Serializable {
     private Set<OrderItem> items = new HashSet<>();
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private Payment payment;
-    /* CascadeType.ALL significa que qualquer operação feita em Order
-     será replicada automaticamente para Payment.
-     Se apagar um Order, o Payment correspondente também será apagado.
-     Se salvar um Order, o Payment associado será salvo automaticamente. */
     @OneToOne
     @JoinColumn(name = "coupon_id", nullable = true)
     private Coupon discount;
@@ -98,8 +90,6 @@ public class Order implements Serializable {
     public void setItems(Set<OrderItem> items) {
         this.items = (items != null) ? items : new HashSet<>();
     }
-    //Se items não for null, ele simplesmente atribui o valor recebido à variável this.items.
-    //Se items for null, ele cria um novo HashSet<>() vazio, evitando NullPointerException.
     public void addItem(OrderItem item) {
         if (item != null) {
             this.items.add(item);
@@ -128,17 +118,10 @@ public class Order implements Serializable {
         for (OrderItem item : items) {
             total += item.getSubTotal();
         }
-        // Se houver um cupom de desconto
         if (discount != null) {
             total -= total * (discount.getDiscountPercentage() / 100);
         }
-
-        // Arredondando o total para duas casas decimais
         BigDecimal totalBigDecimal = new BigDecimal(String.valueOf(total)).setScale(2, RoundingMode.DOWN);
-        //Usar new BigDecimal(double) pode não ser preciso devido a problemas internos de representação de ponto flutuante (double).
-        // O recomendado é sempre converter double para String antes de criar um BigDecimal
-
-        // Retorna o total com duas casas decimais
         return totalBigDecimal.doubleValue();
     }
 

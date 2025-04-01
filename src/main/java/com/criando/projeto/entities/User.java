@@ -10,16 +10,12 @@ import java.util.List;
 import java.util.Objects;
 
 
-//mapeando a entidade:
 @Entity
-//User é uma palavra reservada do banco h2, por isso tem que renomear o banco:
 @Table(name = "tb_user")
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;
     
-    //identificado o ID como chave primaria do banco de dados: @Id
-    //como é uma chave numerica, ela vai ser autoimplementável lá no banco de dados
-    //para informar isso usamos: @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,18 +30,10 @@ public class User implements Serializable {
     @Size(min = 9, max = 17, message = "O telefone deve ter entre 3 e 17 caracteres.")
     private String phone;
     @NotBlank(message = "A senha não pode estar vazia.")
-    /*@Size(min = 3, max = 8, message = "A senha deve ter entre 3 e 8 caracteres.")
-    @Pattern(
-            regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$",
-            message = "A senha deve conter pelo menos uma letra, um número e um símbolo especial (@$!%*?&)."
-    )*/
+    // validações de senha estão inclusas no service, para passar no spring security
     private String password;
     @Enumerated(EnumType.STRING)
     private UserRole role;
-    /* a relação entre user e order é de one to many, o que signifca que
-     * será um user para varios pedidos, para indicar esse tipo de relação como chave estrageira
-     * para o JPA, se usa a annotation @OneToMany(mappedBy: "o nome de como ele foi declarado")
-     * o JsonIgnora é pra que não um loop na ligação entre user e order, pra um n ficar chamando o outro eternamente*/
     @JsonIgnore
     @OneToMany(mappedBy = "client")
     private List<Order> orders = new ArrayList<>();

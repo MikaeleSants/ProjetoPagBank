@@ -15,9 +15,7 @@ import java.util.Objects;
 @Table(name = "tb_order_item")
 public class OrderItem implements Serializable {
     private static final long serialVersionUID = 1L;
-    /*A tabela intermediária OrderItem tem uma chave primária composta, ou seja,
-    a chave primária é formada por duas colunas (order_id e product_id). Para representar isso no JPA,
-    usamos uma classe auxiliar chamada OrderItemPk, que é marcada com @Embeddable.*/
+
     @EmbeddedId
     private OrderItemPk id = new OrderItemPk();
     private Integer quantity;
@@ -30,7 +28,7 @@ public class OrderItem implements Serializable {
         id.setOrder(order);
         id.setProduct(product);
         this.quantity = quantity;
-        this.price = product.getPrice(); // Define o preço com base no produto
+        this.price = product.getPrice();
     }
 
     @JsonIgnore
@@ -45,7 +43,7 @@ public class OrderItem implements Serializable {
     }
     public void setProduct(Product product) {
         id.setProduct(product);
-        this.price = product.getPrice(); // Atualiza o preço ao definir o produto
+        this.price = product.getPrice();
     }
     public Integer getQuantity() {
         return quantity;

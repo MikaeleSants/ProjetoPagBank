@@ -25,8 +25,7 @@ import java.util.stream.Collectors;
 @Service
 public class OrderServices {
 
-    //injeta a Orderrepository, mas não precisamos botar o @Component na classe OrderRepository
-    //como fizemos nessa, pq o OrderRepository extends JpaRepository, que já é marcado como componente
+
     @Autowired
     private OrderRepository orderRepository;
     @Autowired
@@ -41,10 +40,7 @@ public class OrderServices {
     private AuthenticationFacade authenticationFacade; // Para pegar o usuário logado
 
 
-    // O metodo recebe um parâmetro Specification<Order>, que representa um critério de filtro para a busca.
-//Ele chama orderRepository.findAll(specification), que delega a busca ao repositório.
-//O metodo retorna uma lista de Order que correspondem aos filtros especificados.
-    // Metodo para buscar pedidos com base na Specification (já levando em conta a lógica de filtro)
+
     public List<Order> findOrders(OrderQueryFilter filter) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -54,94 +50,71 @@ public class OrderServices {
             Long userId = authenticationFacade.getAuthenticatedUser().getId();
             filter.setUserId(userId);
         }
-
         // Gera a Specification a partir do filtro
         Specification<Order> spec = filter.toSpecification();
-
         // Busca os pedidos com base na Specification
         return orderRepository.findAll(spec);
     }
 
-    // Método para obter um pedido específico
+
     public Order findById(Long id, Authentication authentication) {
         Order order = orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado" + id));
-
-        // Verifica se o usuário tem permissão para acessar esse pedido
         if (!authenticationFacade.isAdmin(authentication) && !authenticationFacade.isSameUser(order.getClient().getId())) {
             throw new AccessDeniedException("Você não tem permissão para acessar este pedido.");
         }
-
         return order;
     }
 
-    public Order insert(Order order) {
-        // Obtém o e-mail do usuário autenticado
-        String email = authenticationFacade.getAuthenticatedUserEmail();
 
-        // Busca o usuário pelo e-mail
+
+    public Order insert(Order order) {
+        String email = authenticationFacade.getAuthenticatedUserEmail();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado" + email));
-
-        // Define o ID do usuário autenticado na ordem
         order.setClient(user);
-
-        // Guarda os itens enviados na requisição,O var no Java é um tipo inferido introduzido no Java 10. Ele permite que o compilador determine automaticamente o tipo da variável com base no valor atribuído.
+        // Guarda os itens enviados na requisição
         var orderItems = order.getItems();
-
         // Zera os itens do pedido para evitar problemas de persistência, Quando você "zera" os itens do pedido com order.setItems(new HashSet<>()), a referência antiga para os itens é substituída, mas os objetos anteriores ainda existem na memória até que o Garbage Collector (GC) do Java os remova, caso não estejam mais sendo referenciados.
         order.setItems(new HashSet<>());
-
         // Se o pedido tiver um cupom, buscar no banco de dados
         Coupon coupon = applyCouponToOrder(order);
         if (coupon != null) {
             order.setDiscount(coupon);
         }
-
         // Salva o pedido sem itens
         var savedOrder = orderRepository.save(order);
-
         // Processa cada item para buscar o produto e definir corretamente o preço
         orderItems.forEach(orderItem -> {
             // Buscar o produto no banco de dados
             Product product = productRepository.findById(orderItem.getProduct().getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado: ID " + orderItem.getProduct().getId()));
-
             // Atualizar os dados do OrderItem com os dados do produto encontrado, de acordo com os atributos do order item
             orderItem.setOrder(savedOrder);
             orderItem.setProduct(product);
             orderItem.setPrice(product.getPrice()); // Define o preço do produto no pedido
         });
-
         // Salva todos os itens com as informações do produto
         var savedItems = orderItemRepository.saveAll(orderItems);
-
         // Associa os itens ao pedido
         savedOrder.setItems(new HashSet<>(savedItems));
-
         return savedOrder;
     }
 
 
     public Order setOrderPayment(Long orderId, Payment payment) {
-        // Buscar o pedido pelo ID
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado. ID:" + orderId));
         //verifica se o status é = a PAID ou CANCELED
         validateOrderStatus(order);
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!authenticationFacade.isAdmin(authentication) && !authenticationFacade.isSameUser(order.getClient().getId())) {
             throw new AccessDeniedException("Você não tem permissão para alterar o pagamento deste pedido.");
         }
-
         if (order.getOrderStatus() == null || !isValidOrderStatus(order.getOrderStatus())) {
             throw new InvalidOrderStatusException(order.getOrderStatus().toString(), "O status fornecido não é válido.");
         }
-
-        // SE NÃO, atualiza os dados do pagamento e associa ao pedido
         payment.setOrder(order); //Order tem uma referência para Payment.
         order.setPayment(payment); //Payment tem uma referência para Order.
-
         // Verifica se o pagamento está preenchido e, se sim, altera o status do pedido para "PAID"
         if (payment.getPaymentMethod() != null) {
             // Considerando que o pagamento foi concluído se tiver valor e data de pagamento
@@ -153,10 +126,8 @@ public class OrderServices {
 
 
     public Order setOrDeleteCoupon(Long orderId, Long couponId) {
-        // Buscar o pedido pelo ID
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado. ID:" + orderId));
-        // Verifica se o usuário logado tem permissão para modificar o pedido
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!authenticationFacade.isAdmin(authentication) && !authenticationFacade.isSameUser(order.getClient().getId())) {
             throw new AccessDeniedException("Você não tem permissão para aplicar/remover cupom deste pedido.");
@@ -180,26 +151,23 @@ public class OrderServices {
     }
 
 
+
     public Order update(Long id, Order obj) {
         try {
-            // Buscar o pedido pelo ID
             Order entity = orderRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado. ID:" + id));
-            // Verifica se o usuário logado tem permissão para atualizar esse pedido
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (!authenticationFacade.isAdmin(authentication) && !authenticationFacade.isSameUser(entity.getClient().getId())) {
                 throw new AccessDeniedException("Você não tem permissão para atualizar este pedido.");
             }
-            // Fazendo a validação do status para confirmar se pode mudar
             validateOrderStatus(entity);
-            // Atualizar os dados gerais do pedido
             updateData(entity, obj);
-            // Salvar o pedido com as atualizações
             return orderRepository.save(entity);
         } catch (ResourceNotFoundException e) {
-            throw e; // Garante que o erro 404 seja propagado corretamente
+            throw e;
         }
     }
+
     private void updateData(Order entity, Order obj) {
         // Atualiza o status do pedido
         if (obj.getOrderStatus() != null) {
@@ -224,77 +192,52 @@ public class OrderServices {
     }
 
 
-    // Atualizar ou adicionar itens ao pedido
+
     public Order updateOrderItems(Long orderId, Set<OrderItem> newItems, Authentication authentication) {
-        // Buscar o pedido pelo ID
+
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado. ID:" + orderId));
-        // Verifica se o usuário tem permissão para editar este pedido
         if (!authenticationFacade.isAdmin(authentication) && !authenticationFacade.isSameUser(order.getClient().getId())) {
             throw new AccessDeniedException("Você não tem permissão para editar este pedido.");
         }
         validateOrderStatus(order);
-        // Atualizar ou adicionar os itens ao pedido
         updateItemsInOrder(order, newItems);
-
-        // Salvar o pedido com os itens atualizados ou adicionados
         return orderRepository.save(order);
     }
+
     // Metodo responsável por atualizar ou adicionar itens ao pedido
     private void updateItemsInOrder(Order order, Set<OrderItem> newItems) {
         // Mapeia os itens existentes do pedido para um Map, usando o ID do produto como chave
         Map<Long, OrderItem> existingItemsMap = order.getItems().stream()
                 .collect(Collectors.toMap(item -> item.getProduct().getId(), item -> item));
-    /*order.getItems():
-    Esse metodo retorna um conjunto (Set<OrderItem>) com todos os itens associados ao pedido (Order).
-    .stream():
-    Converte o Set<OrderItem> em um stream para poder aplicar operações de transformação (como collect) aos elementos. O stream permite fazer operações funcionais, como filtragem, mapeamento e coleta de dados.
-    .collect(Collectors.toMap(...)):
-    O collect é uma operação terminal que transforma o stream em uma coleção. Neste caso, estamos usando o Collectors.toMap() para coletar os itens em um mapa (Map).
-    Collectors.toMap(item -> item.getProduct().getId(), item -> item):
-    O toMap espera dois argumentos:
-    Chave: O primeiro argumento é a função que define a chave do mapa. No caso, item.getProduct().getId() pega o ID do produto associado ao OrderItem e usa como chave do mapa.
-    Valor: O segundo argumento é a função que define o valor do mapa. Aqui, item -> item retorna o próprio OrderItem, ou seja, o valor será o próprio item do pedido.
-    Com isso, você cria um Map<Long, OrderItem>, onde a chave é o ID do produto e o valor é o próprio OrderItem.
-    */
-        //for (OrderItem newItem : newItems) {
         for (OrderItem newItem : newItems) {
-            // Buscar ou atualizar item:
-            //Aqui, o código usa o ID do produto do newItem para buscar um possível item existente no mapa existingItemsMap,
-            //Se o item não existir no pedido, o get() retorna null
             OrderItem existingItem = existingItemsMap.get(newItem.getProduct().getId());
-            //O código verifica se o item já existe no mapa (existingItemsMap). Se o existingItem for não nulo,
-            // isso significa que o item com o mesmo produto já está presente no pedido.
             if (existingItem != null) {
-                // Atualiza a quantidade do item existente e mantém o preço original
                 existingItem.setQuantity(existingItem.getQuantity() + newItem.getQuantity());
             } else {
-                // Caso o item não exista, associamos o produto e adicionamos ao pedido
                 addNewItemToOrder(order, newItem);
             }
         }
     }
+
     // Metodo auxiliar para adicionar um novo item ao pedido
     private void addNewItemToOrder(Order order, OrderItem newItem) {
         // Busca o produto no banco para garantir que estamos associando um produto válido
         Product product = productRepository.findById(newItem.getProduct().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado: ID " + newItem.getProduct().getId()));
-
-        // Define as informações do novo item
-        newItem.setOrder(order);         // Associa o item ao pedido
-        newItem.setProduct(product);     // Associa o produto ao item
-        newItem.setPrice(product.getPrice());  // Define o preço do produto no pedido
-
-        // Adiciona o item à lista de itens do pedido
+        newItem.setOrder(order);
+        newItem.setProduct(product);
+        newItem.setPrice(product.getPrice());
         order.getItems().add(newItem);
     }
+
+
 
 
     public Order updateOrderStatus(Long id, OrderStatus status) {
         Order entity = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado. ID:" + id));;
         validateOrderStatus(entity);
-        // Verifica se o usuário logado tem permissão para atualizar o status do pedido
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!authenticationFacade.isAdmin(authentication) && !authenticationFacade.isSameUser(entity.getClient().getId())) {
             throw new AccessDeniedException("Você não tem permissão para atualizar o status deste pedido.");
@@ -302,63 +245,41 @@ public class OrderServices {
         if (status == null || !isValidOrderStatus(status)) {
             throw new InvalidOrderStatusException(status.toString(), "O status fornecido não é válido.");
         }
-
         entity.setOrderStatus(status);
         return orderRepository.save(entity);
     }
 
     public Order removeProductFromOrder(Long orderId, Long productId) {
-        // Buscar o pedido pelo ID
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado. ID:" + orderId));
-        // Verifica se o usuário logado tem permissão para modificar esse pedido
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!authenticationFacade.isAdmin(authentication) && !authenticationFacade.isSameUser(order.getClient().getId())) {
             throw new AccessDeniedException("Você não tem permissão para remover este produto do pedido.");
         }
         validateOrderStatus(order);
-
         // Buscar o item do pedido que possui o produto com o ID fornecido
         OrderItem itemToRemove = order.getItems().stream()
-                //order.getItems() retorna o conjunto de itens (Set<OrderItem>) associados ao pedido (Order).
-                //.stream() converte esse conjunto (Set) em um stream, o que permite aplicar operações funcionais sobre ele, como filtragem e mapeamento.
                 .filter(item -> item.getProduct().getId().equals(productId))
-                //.filter(...) aplica um filtro a cada elemento do stream. Neste caso, ele filtra os itens de acordo com o ID do produto.
-                //item.getProduct().getId() acessa o produto do item (OrderItem) e pega o ID desse produto.
-                //.equals(productId) compara o ID do produto de cada item com o productId fornecido como parâmetro (ou seja, o ID do produto que você está buscando no pedido).
-                //Esse filtro mantém apenas o item (produto) que tem o mesmo ID do produto fornecido.
                 .findFirst()
-                //.findFirst() retorna o primeiro elemento que corresponde ao filtro aplicado. Como o stream é filtrado para buscar um item específico (pelo ID do produto), o método findFirst irá retornar o primeiro item que corresponde ao filtro, ou seja, o item encontrado ou Optional.empty() caso o item não seja encontrado.
                 .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado no pedido"));
-
-        // Remover o item do pedido
         order.getItems().remove(itemToRemove);
-        // Salvar o pedido atualizado
         return orderRepository.save(order);
     }
 
     public void delete(Long id) {
-
         try {
             Order order = orderRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado. ID:" + id));
-            // Verifica se o usuário logado tem permissão para deletar esse pedido
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (!authenticationFacade.isAdmin(authentication) && !authenticationFacade.isSameUser(order.getClient().getId())) {
                 throw new AccessDeniedException("Você não tem permissão para deletar este pedido.");
             }
-            // Remove a referência ao pagamento (se existir)
             if (order.getPayment() != null) {
                 order.setPayment(null);
             }
-
-            // Remove a referência ao cupom (se existir)
             order.setDiscount(null);
-
-            // Limpa os itens do pedido
             order.getItems().clear();
-            orderRepository.save(order); // Salva a ordem sem itens antes de excluir
-
+            orderRepository.save(order);
             orderRepository.deleteById(id);
         } catch (EmptyResultDataAccessException e) {
             throw new ResourceNotFoundException(id);
@@ -381,7 +302,6 @@ public class OrderServices {
 
     // Método auxiliar para verificar se o status é válido
     private boolean isValidOrderStatus(OrderStatus status) {
-        // Verifique se o status fornecido é um valor válido de OrderStatus
         return status == OrderStatus.WAITING_PAYMENT || status == OrderStatus.PAID || status == OrderStatus.CANCELED;
     }
     // Método auxiliar para verificar se o pedido está finalizado no sistema

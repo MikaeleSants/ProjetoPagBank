@@ -27,17 +27,17 @@ public class OrderResources {
     private OrderServices orderServices;
 
 
-    //responseEntity é um tipo do spring para retornar respostas de requisicoes web
+
     @GetMapping
     public ResponseEntity<List<Order>> findOrders(OrderQueryFilter filter) {
-        // Chama o serviço para buscar os pedidos
         List<Order> orders = orderServices.findOrders(filter);
         return ResponseEntity.ok().body(orders);
     }
     /*
     GET /orders
     GET /orders?userId=1
-    GET /orders?orderStatus=PAID
+    GET /orders?orderStatus=PAID (para user)
+    GET /orders?PAID (admin)
      */
 
 
@@ -46,6 +46,8 @@ public class OrderResources {
         Order order = orderServices.findById(id, authentication);
         return ResponseEntity.ok(order);
     }
+
+
 
     @PostMapping
     public ResponseEntity<Order> insert(@Valid @RequestBody Order obj) {
@@ -71,16 +73,20 @@ public class OrderResources {
         return ResponseEntity.ok(updatedOrder);
     }
 
-    @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        orderServices.delete(id);
-        return ResponseEntity.noContent().build();
-    }
+
 
     @PutMapping(value = "/{id}")
     public ResponseEntity<Order> update(@PathVariable Long id, @Valid @RequestBody Order obj) {
         obj = orderServices.update(id, obj);
         return ResponseEntity.ok().body(obj);
+    }
+
+
+
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        orderServices.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{orderId}/remove-product/{productId}")
@@ -92,7 +98,6 @@ public class OrderResources {
             return ResponseEntity.notFound().build();
         }
     }
-
 
     @DeleteMapping("/{orderId}/remove-coupon")
     public ResponseEntity<Order> removeCouponFromOrder(@PathVariable Long orderId) {

@@ -16,13 +16,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-//@Component registra a classe como componente, para que ela possa ser injetado automaticamente com o AutoWired
-// Mas tem uma anotação que faz a mesma coisa, só que é semanticamente mais correta:
 @Service
 public class UserServices {
 
-    //injeta a userrepository, mas não precisamos botar o @Component na classe UserRepository
-    //como fizemos nessa, pq o UserRepository extends JpaRepository, que já é marcado como componente
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -33,27 +29,12 @@ public class UserServices {
     private UserSecurity userSecurity;
 
 
-//    @Autowired
-//    private BCryptPasswordEncoder passwordEncoderDois;
-//
-//    public void updatePasswordsForAllUsers() {
-//        List<User> users = userRepository.findAll();
-//
-//        for (User user : users) {
-//            if (user.getPassword() != null) {
-//                // Codifica a senha com BCrypt
-//                String encodedPassword = passwordEncoder.encode(user.getPassword());
-//                user.setPassword(encodedPassword);
-//                userRepository.save(user); // Atualiza a senha no banco
-//            }
-//        }
-//    }
 
 
-    // O metodo findAll(), findbyId vem do JpaRepository
+
+
     public List<User> findAll() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         // Se o usuário for do role USER, ele só pode ver o próprio usuário
         if (authenticationFacade.isUser(authentication)) {
             // Define automaticamente o userId para o id do usuário logado
@@ -64,34 +45,32 @@ public class UserServices {
         // Se for ADMIN ou outro papel, pode retornar todos os usuários
         return userRepository.findAll();
     }
+
+
     public User findById(Long id) {
         Optional <User> obj =  userRepository.findById(id);
         return obj.orElseThrow(() -> new ResourceNotFoundException(id));
     }
+
+
     public User insert(User obj) {
         Optional<User> existingUser = userRepository.findByEmail(obj.getEmail());
         if (existingUser.isPresent()) {
             throw new EmailAlreadyExistsException("O e-mail informado já está em uso.");
         }
-
-        // Validação de senha
         validatePassword(obj.getPassword());
-
         // Codifica a senha com BCrypt
         obj.setPassword(passwordEncoder.encode(obj.getPassword()));
-
         return userRepository.save(obj);
     }
 
 
     public void delete(Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         // Verifica se o usuário tem permissão para deletar (próprio usuário ou admin)
         if (!userSecurity.checkUserOwnership(authentication, id)) {
             throw new AccessDeniedException("Você não tem permissão para excluir este usuário.");
         }
-
         try {
             userRepository.deleteById(id);
         } catch (EmptyResultDataAccessException e) {
@@ -103,7 +82,6 @@ public class UserServices {
 
 
 
-    //AQUI
     public User updatePatch(Long id, User obj, Authentication authentication) {
         try {
             User entity = userRepository.findById(id)
@@ -139,6 +117,8 @@ public class UserServices {
         }
     }
 
+
+
 // METODOS AUXILIARES:
     private void validateEmail(User entity, String newEmail) {
         Optional<User> existingUser = userRepository.findByEmail(newEmail);
@@ -148,14 +128,11 @@ public class UserServices {
     }
 
     private void validatePassword(String password) {
-
         if (password.length() < 3 || password.length() > 8) {
             throw new InvalidPasswordLengthException();
         }
-
         if (!password.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$")) {
             throw new InvalidPasswordPatternException();
         }
-
     }
 }

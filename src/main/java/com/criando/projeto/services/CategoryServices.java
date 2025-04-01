@@ -40,7 +40,7 @@ public class CategoryServices {
             updateData(entity, obj);
             return categoryRepository.save(entity);
         } catch (ResourceNotFoundException e) {
-            throw e; // Garante que o erro 404 seja propagado corretamente
+            throw e;
         }
     }
 
