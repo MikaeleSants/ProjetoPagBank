@@ -62,13 +62,6 @@ public class ResourceExceptionHandler {
         return ResponseEntity.status(status).body(err);
     }
 
-    @ExceptionHandler(NullPasswordException.class)
-    public ResponseEntity<StandardError> nullPassword(NullPasswordException e, HttpServletRequest request) {
-        HttpStatus status = HttpStatus.BAD_REQUEST;
-        StandardError err = new StandardError(Instant.now(), status.value(), "Password cannot be null", e.getMessage(), request.getRequestURI());
-        return ResponseEntity.status(status).body(err);
-    }
-
     @ExceptionHandler(OrderStatusConflictException.class)
     public ResponseEntity<StandardError> orderStatusConflict(OrderStatusConflictException e, HttpServletRequest request) {
         HttpStatus status = HttpStatus.BAD_REQUEST;

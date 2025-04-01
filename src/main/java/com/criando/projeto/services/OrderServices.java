@@ -129,6 +129,11 @@ public class OrderServices {
         //verifica se o status é = a PAID ou CANCELED
         validateOrderStatus(order);
 
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!authenticationFacade.isAdmin(authentication) && !authenticationFacade.isSameUser(order.getClient().getId())) {
+            throw new AccessDeniedException("Você não tem permissão para alterar o pagamento deste pedido.");
+        }
+
         if (order.getOrderStatus() == null || !isValidOrderStatus(order.getOrderStatus())) {
             throw new InvalidOrderStatusException(order.getOrderStatus().toString(), "O status fornecido não é válido.");
         }
@@ -151,6 +156,11 @@ public class OrderServices {
         // Buscar o pedido pelo ID
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado. ID:" + orderId));
+        // Verifica se o usuário logado tem permissão para modificar o pedido
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!authenticationFacade.isAdmin(authentication) && !authenticationFacade.isSameUser(order.getClient().getId())) {
+            throw new AccessDeniedException("Você não tem permissão para aplicar/remover cupom deste pedido.");
+        }
         validateOrderStatus(order);
         // Se o couponId não for nulo, buscar o cupom no banco de dados
         if (couponId != null) {
@@ -175,6 +185,11 @@ public class OrderServices {
             // Buscar o pedido pelo ID
             Order entity = orderRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado. ID:" + id));
+            // Verifica se o usuário logado tem permissão para atualizar esse pedido
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (!authenticationFacade.isAdmin(authentication) && !authenticationFacade.isSameUser(entity.getClient().getId())) {
+                throw new AccessDeniedException("Você não tem permissão para atualizar este pedido.");
+            }
             // Fazendo a validação do status para confirmar se pode mudar
             validateOrderStatus(entity);
             // Atualizar os dados gerais do pedido
@@ -210,10 +225,14 @@ public class OrderServices {
 
 
     // Atualizar ou adicionar itens ao pedido
-    public Order updateOrderItems(Long orderId, Set<OrderItem> newItems) {
+    public Order updateOrderItems(Long orderId, Set<OrderItem> newItems, Authentication authentication) {
         // Buscar o pedido pelo ID
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado. ID:" + orderId));
+        // Verifica se o usuário tem permissão para editar este pedido
+        if (!authenticationFacade.isAdmin(authentication) && !authenticationFacade.isSameUser(order.getClient().getId())) {
+            throw new AccessDeniedException("Você não tem permissão para editar este pedido.");
+        }
         validateOrderStatus(order);
         // Atualizar ou adicionar os itens ao pedido
         updateItemsInOrder(order, newItems);
@@ -275,7 +294,11 @@ public class OrderServices {
         Order entity = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado. ID:" + id));;
         validateOrderStatus(entity);
-
+        // Verifica se o usuário logado tem permissão para atualizar o status do pedido
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!authenticationFacade.isAdmin(authentication) && !authenticationFacade.isSameUser(entity.getClient().getId())) {
+            throw new AccessDeniedException("Você não tem permissão para atualizar o status deste pedido.");
+        }
         if (status == null || !isValidOrderStatus(status)) {
             throw new InvalidOrderStatusException(status.toString(), "O status fornecido não é válido.");
         }
@@ -288,6 +311,11 @@ public class OrderServices {
         // Buscar o pedido pelo ID
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado. ID:" + orderId));
+        // Verifica se o usuário logado tem permissão para modificar esse pedido
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!authenticationFacade.isAdmin(authentication) && !authenticationFacade.isSameUser(order.getClient().getId())) {
+            throw new AccessDeniedException("Você não tem permissão para remover este produto do pedido.");
+        }
         validateOrderStatus(order);
 
         // Buscar o item do pedido que possui o produto com o ID fornecido
@@ -314,7 +342,11 @@ public class OrderServices {
         try {
             Order order = orderRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado. ID:" + id));
-
+            // Verifica se o usuário logado tem permissão para deletar esse pedido
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (!authenticationFacade.isAdmin(authentication) && !authenticationFacade.isSameUser(order.getClient().getId())) {
+                throw new AccessDeniedException("Você não tem permissão para deletar este pedido.");
+            }
             // Remove a referência ao pagamento (se existir)
             if (order.getPayment() != null) {
                 order.setPayment(null);

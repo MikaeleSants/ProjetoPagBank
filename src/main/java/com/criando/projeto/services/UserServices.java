@@ -2,16 +2,17 @@ package com.criando.projeto.services;
 
 import com.criando.projeto.entities.User;
 import com.criando.projeto.repositories.UserRepository;
+import com.criando.projeto.security.UserSecurity;
 import com.criando.projeto.services.exceptions.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +29,8 @@ public class UserServices {
     private PasswordEncoder passwordEncoder; // Injetando o PasswordEncoder
     @Autowired
     private AuthenticationFacade authenticationFacade;
+    @Autowired
+    private UserSecurity userSecurity;
 
 
 //    @Autowired
@@ -49,6 +52,16 @@ public class UserServices {
 
     // O metodo findAll(), findbyId vem do JpaRepository
     public List<User> findAll() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // Se o usuário for do role USER, ele só pode ver o próprio usuário
+        if (authenticationFacade.isUser(authentication)) {
+            // Define automaticamente o userId para o id do usuário logado
+            Long userId = authenticationFacade.getAuthenticatedUser().getId();
+            // Buscar o usuário específico usando o userId
+            return userRepository.findById(userId).map(Collections::singletonList).orElse(Collections.emptyList());
+        }
+        // Se for ADMIN ou outro papel, pode retornar todos os usuários
         return userRepository.findAll();
     }
     public User findById(Long id) {
@@ -58,7 +71,7 @@ public class UserServices {
     public User insert(User obj) {
         Optional<User> existingUser = userRepository.findByEmail(obj.getEmail());
         if (existingUser.isPresent()) {
-            throw new EmailAlreadyExistsException(obj.getEmail());
+            throw new EmailAlreadyExistsException("O e-mail informado já está em uso.");
         }
 
         // Validação de senha
@@ -72,16 +85,36 @@ public class UserServices {
 
 
     public void delete(Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // Verifica se o usuário tem permissão para deletar (próprio usuário ou admin)
+        if (!userSecurity.checkUserOwnership(authentication, id)) {
+            throw new AccessDeniedException("Você não tem permissão para excluir este usuário.");
+        }
+
         try {
-        userRepository.deleteById(id); }
-        catch (EmptyResultDataAccessException e) {throw new ResourceNotFoundException(id);} //Você tentou excluir um usuário com um id que não foi encontrado.
-        catch (DataIntegrityViolationException e) {throw new DatabaseException(e.getMessage());} // Essa exceção ocorre quando a tentativa de exclusão viola uma restrição de integridade no banco de dados. Isso pode acontecer, por exemplo, quando um registro está sendo referenciado por outro
+            userRepository.deleteById(id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new ResourceNotFoundException(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new DatabaseException("Não é possível excluir este usuário, pois há referências a ele.");
+        }
     }
+
+
+
     //AQUI
-    public User updatePatch(Long id, User obj) {
+    public User updatePatch(Long id, User obj, Authentication authentication) {
         try {
             User entity = userRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException(id));
+
+            User authenticatedUser = authenticationFacade.getAuthenticatedUser(); // Obtém o usuário logado
+
+            // Se o usuário autenticado NÃO for admin e tentar atualizar outro usuário, lançar erro
+            if (!authenticationFacade.isAdmin(authentication) && !authenticatedUser.getId().equals(id)) {
+                throw new AccessDeniedException("Você só pode atualizar os seus próprios dados.");
+            }
             patchUpdateData(entity, obj);
             return userRepository.save(entity);
         } catch (ResourceNotFoundException e) {
@@ -110,7 +143,7 @@ public class UserServices {
     private void validateEmail(User entity, String newEmail) {
         Optional<User> existingUser = userRepository.findByEmail(newEmail);
         if (existingUser.isPresent() && !existingUser.get().getId().equals(entity.getId())) {
-            throw new EmailAlreadyExistsException(newEmail);
+            throw new EmailAlreadyExistsException("Email já está em uso");
         }
     }
 

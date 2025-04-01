@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
@@ -115,7 +116,9 @@ public class OrderResources {
 
     @PatchMapping("/{id}/items")
     public ResponseEntity<Order> updateOrderItems(@PathVariable Long id, @RequestBody Set<OrderItem> items) {
-        Order updatedOrder = orderServices.updateOrderItems(id, items);
+        // Obtém a autenticação atual (usuário logado)
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Order updatedOrder = orderServices.updateOrderItems(id, items, authentication);
         return ResponseEntity.ok(updatedOrder);
     }
 }

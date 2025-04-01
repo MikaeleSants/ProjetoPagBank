@@ -8,6 +8,7 @@ import com.criando.projeto.services.UserServices;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -58,16 +59,16 @@ public class UserResources {
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(user.getId()).toUri();
     return ResponseEntity.created(uri).body(user);}
 
-    @DeleteMapping(value = "/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<User> updatePatch(@PathVariable Long id, @RequestBody User obj) {
-        obj = service.updatePatch(id, obj);
-        return ResponseEntity.ok().body(obj);
+    public ResponseEntity<User> updatePatch(@PathVariable Long id, @RequestBody User obj, Authentication authentication) {
+        User updatedUser = service.updatePatch(id, obj, authentication);
+        return ResponseEntity.ok(updatedUser);
     }
 
 
