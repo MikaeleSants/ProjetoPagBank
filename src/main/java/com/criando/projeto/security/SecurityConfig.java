@@ -22,6 +22,10 @@ public class SecurityConfig {
     private OrderSecurity orderSecurity;
     @Autowired
     private UserSecurity userSecurity;
+    @Autowired
+    private CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    @Autowired
+    private CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
@@ -34,7 +38,7 @@ public class SecurityConfig {
         http
                 .csrf().disable()
                 .authorizeRequests()
-
+                
 
 
                 //ACESSOS A ORDERS
@@ -100,7 +104,11 @@ public class SecurityConfig {
 
                 .anyRequest().authenticated()
                 .and()
-                .httpBasic();
+                .httpBasic()
+                .and()
+                .exceptionHandling()
+                .authenticationEntryPoint(customAuthenticationEntryPoint)
+                .accessDeniedHandler(customAccessDeniedHandler);
 
         return http.build();
     }
