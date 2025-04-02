@@ -2,6 +2,9 @@ package com.criando.projeto.services;
 
 import com.criando.projeto.entities.User;
 import com.criando.projeto.repositories.UserRepository;
+import com.criando.projeto.services.exceptions.AccessDeniedException;
+import com.criando.projeto.services.exceptions.AuthenticationRequiredException;
+import com.criando.projeto.services.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
@@ -26,7 +29,7 @@ public class AuthenticationFacade {
         if (authentication != null && authentication.isAuthenticated()) {
             return authentication.getName(); // Retorna o e-mail do usuário logado
         }
-        throw new RuntimeException("Usuário não autenticado");
+        throw new AuthenticationRequiredException("Usuário não autenticado");
     }
 
     // Metodo para buscar o usuário autenticado
@@ -35,7 +38,7 @@ public class AuthenticationFacade {
         String email = getAuthenticatedUserEmail(); // Obtém o e-mail do usuário autenticado
 
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado: " + email ));
     }
 
     // Metodo para verificar se o usuário é ADMIN
@@ -54,7 +57,11 @@ public class AuthenticationFacade {
 
     // Metodo para aplicar o id do usuário autenticado nas requisições
     public boolean isSameUser(Long userId) {
-        User authenticatedUser = getAuthenticatedUser();
-        return authenticatedUser.getId().equals(userId);
+        try {
+            User authenticatedUser = getAuthenticatedUser();
+            return authenticatedUser.getId().equals(userId);
+        } catch (Exception e) {
+            throw new AccessDeniedException("Acesso negado! O ID logado não corresponde ao ID da busca");
+        }
     }
 }

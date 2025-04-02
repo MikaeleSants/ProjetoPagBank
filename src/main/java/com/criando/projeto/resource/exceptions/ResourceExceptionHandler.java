@@ -69,6 +69,21 @@ public class ResourceExceptionHandler {
         return ResponseEntity.status(status).body(err);
     }
 
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<StandardError> accessDeniedException(AccessDeniedException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        StandardError err = new StandardError(Instant.now(), status.value(), "Acesso negado", e.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status).body(err);
+    }
+
+    @ExceptionHandler(AuthenticationRequiredException.class)
+    public ResponseEntity<StandardError> authenticationRequiredException(AuthenticationRequiredException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        StandardError err = new StandardError(Instant.now(), status.value(), "Usuário não autenticado", e.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status).body(err);
+    }
+
     // Se for outro erro não tratado, vamos retornar um erro genérico
     @ExceptionHandler(Exception.class)
     public ResponseEntity<StandardError> handleException(Exception e, HttpServletRequest request) {

@@ -1,6 +1,7 @@
 package com.criando.projeto.security;
 import com.criando.projeto.entities.User;
 import com.criando.projeto.repositories.UserRepository;
+import com.criando.projeto.services.exceptions.AuthenticationRequiredException;
 import com.criando.projeto.services.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -14,7 +15,7 @@ public class UserSecurity {
 
     public boolean checkUserOwnership(Authentication authentication, Long userId) {
         if (authentication == null || !authentication.isAuthenticated()) {
-            return false; // Usuário não autenticado
+            throw new AuthenticationRequiredException("Acesso negado: usuário não autenticado");
         }
 
         // Obtém o e-mail do usuário autenticado
