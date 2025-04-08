@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -40,7 +41,8 @@ public class OrderServices {
     private AuthenticationFacade authenticationFacade; // Para pegar o usuário logado
 
 
-
+    // Somente ADMIN pode ver todos os pedidos, USER só vê os próprios (regra no código)
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     public List<Order> findOrders(OrderQueryFilter filter) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -56,7 +58,8 @@ public class OrderServices {
         return orderRepository.findAll(spec);
     }
 
-
+    // Só ADMIN ou o dono pode ver
+    @PreAuthorize("hasRole('ADMIN') or @authenticationFacade.isSameUserId(#id)")
     public Order findById(Long id, Authentication authentication) {
         Order order = orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado" + id));
         if (!authenticationFacade.isAdmin(authentication) && !authenticationFacade.isSameUser(order.getClient().getId())) {
@@ -66,11 +69,13 @@ public class OrderServices {
     }
 
 
-
+    // Só pode criar pedido pra si mesmo
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public Order insert(Order order) {
         String email = authenticationFacade.getAuthenticatedUserEmail();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado" + email));
+        //seta o user no client do pedido
         order.setClient(user);
         // Guarda os itens enviados na requisição
         var orderItems = order.getItems();
@@ -100,7 +105,8 @@ public class OrderServices {
         return savedOrder;
     }
 
-
+    // Atualizar pagamento — ADMIN ou dono
+    @PreAuthorize("hasRole('ADMIN') or @authenticationFacade.isSameUserId(#orderId)")
     public Order setOrderPayment(Long orderId, Payment payment) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado. ID:" + orderId));
@@ -124,7 +130,8 @@ public class OrderServices {
         return orderRepository.save(order);
     }
 
-
+    // Aplicar ou remover cupom — ADMIN ou dono
+    @PreAuthorize("hasRole('ADMIN') or @authenticationFacade.isSameUserId(#orderId)")
     public Order setOrDeleteCoupon(Long orderId, Long couponId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado. ID:" + orderId));
@@ -151,7 +158,8 @@ public class OrderServices {
     }
 
 
-
+    // Só ADMIN ou dono do pedido pode editar
+    @PreAuthorize("hasRole('ADMIN') or @authenticationFacade.isSameUserId(#id)")
     public Order update(Long id, Order obj) {
         try {
             Order entity = orderRepository.findById(id)
@@ -192,7 +200,8 @@ public class OrderServices {
     }
 
 
-
+    // Atualizar itens — ADMIN ou dono
+    @PreAuthorize("hasRole('ADMIN') or @authenticationFacade.isSameUserId(#orderId)")
     public Order updateOrderItems(Long orderId, Set<OrderItem> newItems, Authentication authentication) {
 
         Order order = orderRepository.findById(orderId)
@@ -233,7 +242,8 @@ public class OrderServices {
 
 
 
-
+    // Atualizar status — ADMIN ou dono
+    @PreAuthorize("hasRole('ADMIN') or @authenticationFacade.isSameUserId(#id)")
     public Order updateOrderStatus(Long id, OrderStatus status) {
         Order entity = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado. ID:" + id));;
@@ -249,6 +259,8 @@ public class OrderServices {
         return orderRepository.save(entity);
     }
 
+    // Remover item — ADMIN ou dono
+    @PreAuthorize("hasRole('ADMIN') or @authenticationFacade.isSameUserId(#orderId)")
     public Order removeProductFromOrder(Long orderId, Long productId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido não encontrado. ID:" + orderId));
@@ -266,6 +278,8 @@ public class OrderServices {
         return orderRepository.save(order);
     }
 
+    // Deletar — ADMIN ou dono
+    @PreAuthorize("hasRole('ADMIN') or @authenticationFacade.isSameUserId(#id)")
     public void delete(Long id) {
         try {
             Order order = orderRepository.findById(id)

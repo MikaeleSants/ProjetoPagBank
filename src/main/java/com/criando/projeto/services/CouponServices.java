@@ -25,7 +25,7 @@ public class CouponServices {
 
     public Coupon findById(Long id) {
         Optional <Coupon> obj =  couponRepository.findById(id);
-        return obj.orElseThrow(() -> new ResourceNotFoundException(id));
+        return obj.orElseThrow(() -> new ResourceNotFoundException("Cupom não encontrado: ID " + id));
     }
 
     public Coupon insert(Coupon obj) {

@@ -7,6 +7,7 @@ import com.criando.projeto.services.exceptions.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,7 +33,7 @@ public class UserServices {
 
 
 
-
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     public List<User> findAll() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         // Se o usuário for do role USER, ele só pode ver o próprio usuário
@@ -46,7 +47,7 @@ public class UserServices {
         return userRepository.findAll();
     }
 
-
+    @PreAuthorize("hasRole('ADMIN') or @authenticationFacade.isSameUserId(#id)")
     public User findById(Long id) {
         Optional <User> obj =  userRepository.findById(id);
         return obj.orElseThrow(() -> new ResourceNotFoundException(id));
@@ -64,7 +65,7 @@ public class UserServices {
         return userRepository.save(obj);
     }
 
-
+    @PreAuthorize("hasRole('ADMIN') or @authenticationFacade.isSameUserId(#id)")
     public void delete(Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         // Verifica se o usuário tem permissão para deletar (próprio usuário ou admin)
@@ -81,7 +82,7 @@ public class UserServices {
     }
 
 
-
+    @PreAuthorize("hasRole('ADMIN') or @authenticationFacade.isSameUserId(#id)")
     public User updatePatch(Long id, User obj, Authentication authentication) {
         try {
             User entity = userRepository.findById(id)

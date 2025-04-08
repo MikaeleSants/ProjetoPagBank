@@ -91,4 +91,22 @@ public class ResourceExceptionHandler {
         StandardError err = new StandardError(Instant.now(), status.value(), "Internal server error", e.getMessage(), request.getRequestURI());
         return ResponseEntity.status(status).body(err);
     }
+
+    //Para cuidar das validações
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ValidationError> validation(MethodArgumentNotValidException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
+        ValidationError err = new ValidationError(
+                Instant.now(),
+                status.value(),
+                "Erro de validação",
+                "Erro nos campos enviados",
+                request.getRequestURI());
+
+        e.getBindingResult().getFieldErrors().forEach(fieldError -> {
+            err.addError(fieldError.getField(), fieldError.getDefaultMessage());
+        });
+
+        return ResponseEntity.status(status).body(err);
+    }
 }
