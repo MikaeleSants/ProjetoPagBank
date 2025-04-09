@@ -17,6 +17,7 @@ Esta é uma API desenvolvida com Spring Boot e tem como objetivo de gerenciar pe
 - **Containerização**: Docker
 - **Testes de API:** Postman
 - **Controle de versão**: Git e GitHub
+- **Documentação**: Springdoc OpenAPI
 
 ## **Modelagem de Dados**
 - **Entidades Principais**:
@@ -208,9 +209,17 @@ A criação de filtros foi feita usando as Especifications do Spring, a API de c
 - **Conexões**: Via Spring Data JPA
 - **Queries**: Uso de Criteria API e JPQL para consultas dinâmicas (em construção)
 
-## **PERFIS NO CÓDIGO**
+## **Perfis no Código**
   * "TESTE: Ambiente de testes utilizando o banco de dados H2, acessível via console web (http://localhost:8080/h2-console)."
     Utiliza a classe TestConfig para inserção de dados no banco e o Postman para testar requisições.
   * DEV: Associado ao PostgreSQL, utilizando o PgAdmin. A inserção de dados de usuários e produtos é feita através do Postman, 
   enquanto as demais tabelas são povoadas via PgAdmin.
 
+## **Documentação da API**
+Este projeto utiliza o Springdoc OpenAPI para gerar documentação interativa da API.
+A documentação permite visualizar todos os endpoints, seus parâmetros, códigos de resposta e testar as requisições diretamente pela interface do Swagger.
+
+    * Acesso local à documentação:
+    http://localhost:8080/swagger-ui.html
+    OU
+    http://localhost:8080/swagger-ui/index.html
