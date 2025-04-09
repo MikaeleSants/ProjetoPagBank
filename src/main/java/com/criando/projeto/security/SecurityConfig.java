@@ -102,6 +102,13 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/users").permitAll() // Permitir qualquer pessoa criar um usuário COMUM
                 .requestMatchers(HttpMethod.GET, "/products/**", "/categories/**", "/cupons/**").permitAll()  // Acesso público
 
+                //Permissões para o Swagger
+                .requestMatchers(
+                        "/swagger-ui/**",
+                        "/swagger-ui.html",
+                        "/v3/api-docs/**"
+                ).permitAll()
+
                 .anyRequest().authenticated()
                 .and()
                 .httpBasic()
