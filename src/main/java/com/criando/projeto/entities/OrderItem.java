@@ -58,6 +58,10 @@ public class OrderItem implements Serializable {
         this.price = price;
     }
 
+    public OrderItemPk getId() {
+        return id;
+    }
+
     public Double getSubTotal() {
         return price * quantity;
     }

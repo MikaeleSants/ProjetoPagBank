@@ -32,6 +32,10 @@ public class TestConfig implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+
+        Instant start = Instant.now();
+        System.out.println("🚀 Iniciando TestConfig em: " + start);
+
         User u1 = new User(null, "Maria Brown", "maria@gmail.com", "988888888", "123456", UserRole.ADMIN);
         User u2 = new User(null, "Alex Green", "alex@gmail.com", "977777777", "123456", UserRole.USER);
 
@@ -75,6 +79,9 @@ public class TestConfig implements CommandLineRunner {
         o1.setPayment(pay1);
         orderRepository.save(o1);
 
+        Instant end = Instant.now();
+        System.out.println("✅ Finalizou TestConfig em: " + end);
+        System.out.println("⏱️ Tempo total: " + java.time.Duration.between(start, end).toMillis() + "ms");
     }
 
 
