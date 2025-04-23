@@ -15,7 +15,7 @@ Esta é uma API desenvolvida com Spring Boot e tem como objetivo de gerenciar pe
 - **Banco de dados**: PostgreSQL e H2
 - **Autenticação**: Basic Auth com Spring Security
 - **Containerização**: Docker
-- **Testes de API:** Postman
+- **Testes de API:** Postman/Junit5 e Mockito
 - **Controle de versão**: Git e GitHub
 - **Documentação**: Springdoc OpenAPI
 
@@ -71,8 +71,8 @@ A API possui CRUD básico (GET, POST, PATCH, PUT E DELETE) para ORDER, USERS, PR
 }
 ```
 ## Autenticação e Autorização
-A API usa Spring Security com autenticação baseada em banco de dados. "A autenticação é feita via Basic Auth. No Postman, selecione a aba 'Authorization',
-escolha 'Basic Auth' e insira o e-mail e senha do usuário."
+A API usa Spring Security com autenticação baseada em banco de dados. A autenticação é feita via Basic Auth. No Postman, selecione a aba 'Authorization',
+escolha 'Basic Auth' e insira o e-mail e senha do usuário.
 
 Os dois tipos de usuários na API:
 
@@ -211,15 +211,21 @@ A criação de filtros foi feita usando as Especifications do Spring, a API de c
 
 ## **Perfis no Código**
   * "TESTE: Ambiente de testes utilizando o banco de dados H2, acessível via console web (http://localhost:8080/h2-console)."
-    Utiliza a classe TestConfig para inserção de dados no banco e o Postman para testar requisições.
+  Utiliza a classe TestConfig para inserção de dados no banco e o Postman para testar requisições.
   * DEV: Associado ao PostgreSQL, utilizando o PgAdmin. A inserção de dados de usuários e produtos é feita através do Postman, 
   enquanto as demais tabelas são povoadas via PgAdmin.
+
+## **Testes de Qualidade**
+O projeto conta com testes unitários utilizando JUnit 5 e Mockito. Foram testados os services, controllers, repositories e algumas entidades.
+Foram cobertos os casos de sucesso e de lançamento de exceções, além de validar questões de segurança e autenticação.
+A unidade dos testes foi mantida por meio do uso do Mockito, para simular repositórios e componentes externos.
+Para rodar os testes: ```./mvnw test```
+O projeto também acompanha um arquivo de coleção do Postman com as requisições organizadas, permitindo realizar testes manuais e validar o funcionamento dos endpoints.
 
 ## **Documentação da API**
 Este projeto utiliza o Springdoc OpenAPI para gerar documentação interativa da API.
 A documentação permite visualizar todos os endpoints, seus parâmetros, códigos de resposta e testar as requisições diretamente pela interface do Swagger.
-
-    * Acesso local à documentação:
+    Acesso local à documentação:
     http://localhost:8080/swagger-ui.html
     OU
     http://localhost:8080/swagger-ui/index.html
