@@ -41,9 +41,9 @@ public class OrderServicesTest {
     @Mock
     private UserRepository userRepository;
     @Mock
-    ProductRepository productRepository;
+    private ProductRepository productRepository;
     @Mock
-    OrderItemRepository orderItemRepository;
+    private OrderItemRepository orderItemRepository;
 
     @InjectMocks
     private OrderServices orderService;
@@ -201,6 +201,7 @@ public class OrderServicesTest {
         assertThrows(AccessDeniedException.class, () -> {
             orderService.findById(2L, SecurityContextHolder.getContext().getAuthentication());
         });
+        verify(authenticationFacade).isSameUser(2L);
         verify(orderRepository).findById(2L);
     }
 

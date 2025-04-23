@@ -59,6 +59,7 @@ class CouponServicesTest {
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
+    //tenho que revisar isso aqui, tá desnecessário
     @Test
     @DisplayName("Deve inserir cupom com porcentagem tratada")
     void insert() {
