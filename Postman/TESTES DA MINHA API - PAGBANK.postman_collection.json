@@ -1,0 +1,2833 @@
+{
+	"info": {
+		"_postman_id": "57ae4a8f-b3ce-4196-916a-f789bb4b9517",
+		"name": "TESTES DA MINHA API - PAGBANK",
+		"description": "TESTES PARA O MEU PRIMEIRO PROJETO DENTRO DA PAGBANK\n\n## **Objetivo e Contexto**\n\nEsta API tem como objetivo gerenciar pedidos, produtos e usuários de um sistema de vendas online.\n\n## **Arquitetura**\n\n- **Tipo de API**: REST\n    \n- **Comunicação**: Síncrona (requisição-resposta)\n    \n- **Autenticação**: JWT (JSON Web Token) via Spring Security (? ainda n tá decidido)\n    \n- **Controle de versão**: Git e GitHub\n    \n\n## **Modelagem de Dados**\n\n- **Entidades Principais**:\n    \n    - `User`\n        \n    - `Product`\n        \n    - `Order`\n        \n    - `OrderItem`\n        \n    - `Payment`\n        \n    - `Category`",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "40060547"
+	},
+	"item": [
+		{
+			"name": "USER",
+			"item": [
+				{
+					"name": "CRUD ORDER",
+					"item": [
+						{
+							"name": "get order",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "PA@c123",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "paloma.souza@email.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:8080/orders",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"orders"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get order/id",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "PA@c123",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "paloma.souza@email.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:8080/orders/46",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"orders",
+										"46"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "criação de order",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "PA@c123",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "paloma.souza@email.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"orderStatus\":\"WAITING_PAYMENT\",\n    \"items\": [\n        {\n            \"quantity\": 1,\n            \"product\": {\n                \"id\": 6\n            }\n        },\n        {\n            \"quantity\": 1,\n            \"product\": {\n                \"id\": 8\n            }\n        }\n    ],\n    \"discount\": {\n    \"id\": 3\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/orders",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"orders"
+									],
+									"query": [
+										{
+											"key": "orders",
+											"value": null,
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "adicionando cupom a um order",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "PA@c123",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "paloma.souza@email.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:8080/orders/53/apply-coupon/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"orders",
+										"53",
+										"apply-coupon",
+										"1"
+									],
+									"query": [
+										{
+											"key": "orders",
+											"value": null,
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "atualização de order - adicionando pagamento",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "PA@c123",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "paloma.souza@email.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"paymentMethod\": \"PIX\"}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/orders/51/payment",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"orders",
+										"51",
+										"payment"
+									],
+									"query": [
+										{
+											"key": "orders",
+											"value": null,
+											"disabled": true
+										}
+									]
+								},
+								"description": "posso mudar o status pelo nome ou id"
+							},
+							"response": []
+						},
+						{
+							"name": "atualização de order - requisição geral",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "PA@c123",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "paloma.souza@email.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"orderStatus\": \"WAITING_PAYMENT\",\n    \"discount\": {\n        \"id\": 2\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/orders/53",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"orders",
+										"53"
+									],
+									"query": [
+										{
+											"key": "orders",
+											"value": null,
+											"disabled": true
+										}
+									]
+								},
+								"description": "Adicionei todas as informações de novo (sem infos de pagamento ainda) e só mudei o cupom"
+							},
+							"response": []
+						},
+						{
+							"name": "atualização de order - adicionar produto",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "PA@c123",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "paloma.souza@email.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "[\n  {\n    \"product\": {\n      \"id\": 3\n    },\n    \"quantity\": 1\n  },\n  {\n    \"product\": {\n      \"id\": 4\n    },\n    \"quantity\": 1\n  }\n]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/orders/53/items",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"orders",
+										"53",
+										"items"
+									],
+									"query": [
+										{
+											"key": "orders",
+											"value": null,
+											"disabled": true
+										}
+									]
+								},
+								"description": "Adicionei todas as informações de novo (sem infos de pagamento ainda) e só mudei o cupom"
+							},
+							"response": []
+						},
+						{
+							"name": "atualização de order - mudando status",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "PA@c123",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "paloma.souza@email.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \"orderStatus\": \"CANCELED\" }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/orders/53/status",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"orders",
+										"53",
+										"status"
+									],
+									"query": [
+										{
+											"key": "orders",
+											"value": null,
+											"disabled": true
+										}
+									]
+								},
+								"description": "posso mudar o status pelo nome ou id"
+							},
+							"response": []
+						},
+						{
+							"name": "atualização de order - deletando um cupom",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "PA@c123",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "paloma.souza@email.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:8080/orders/53/remove-coupon",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"orders",
+										"53",
+										"remove-coupon"
+									],
+									"query": [
+										{
+											"key": "orders",
+											"value": null,
+											"disabled": true
+										}
+									]
+								},
+								"description": "Adicionei todas as informações de novo (sem infos de pagamento ainda) e só mudei o cupom"
+							},
+							"response": []
+						},
+						{
+							"name": "atualização de order - deletando um produto",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "PA@c123",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "paloma.souza@email.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:8080/orders/53/remove-product/3",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"orders",
+										"53",
+										"remove-product",
+										"3"
+									],
+									"query": [
+										{
+											"key": "orders",
+											"value": null,
+											"disabled": true
+										}
+									]
+								},
+								"description": "Adicionei todas as informações de novo (sem infos de pagamento ainda) e só mudei o cupom"
+							},
+							"response": []
+						}
+					],
+					"description": "Para o usuário comum, os orders só podem ser criados associados ao id da conta logada. O restando do CRUD também só pode ser feito nos Order que possuem o client associado ao user logado.\n\nUsuario comum não consegue deletar um order."
+				},
+				{
+					"name": "CRUD USER",
+					"item": [
+						{
+							"name": "criando user",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n        \"name\": \"Tiago Magalhaes\",\n        \"email\": \"Tiago.BRUNO@email.com\",\n        \"phone\": \"11954327784\",\n        \"password\": \"TM@c123\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/users",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"users"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "buscando user",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "paloma.souza@email.com",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "PA@c123",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/users",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"users"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "atualizando parcialmente user",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "PA@c123",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "paloma.souza@email.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{   \n    \"phone\": \"11953427784\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/users/130",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"users",
+										"130"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deletando user",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "Tiago.BRUNO@email.com",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "TM@c123",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/users/138",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"users",
+										"138"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "A criação de usuários é liberada para todos, sem autenticação.\n\nPara o usuário comum, o restando do CRUD só pode ser feito nos registros ligados ao ID da conta logada."
+				},
+				{
+					"name": "CRUD PRODUCT",
+					"item": [
+						{
+							"name": "buscando products",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "PA@c123",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "paloma.souza@email.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/products",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"products"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "CRUD CATEGORY",
+					"item": [
+						{
+							"name": "consultando categorias",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "paloma.souza@email.com",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "PA@c123",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/categories",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"categories"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "CRUD COUPOM",
+					"item": [
+						{
+							"name": "buscando cupom",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "PA@c123",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "paloma.souza@email.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"code\": \"DESC40\",\n  \"discountPercentage\": 40.0\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/cupons",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"cupons"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "FILTROS",
+					"item": [
+						{
+							"name": "order por status",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "paloma.souza@email.com",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "PA@c123",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/orders?orderStatus=WAITING_PAYMENT",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"orders"
+									],
+									"query": [
+										{
+											"key": "orderStatus",
+											"value": "WAITING_PAYMENT"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "products por name",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "paloma.souza@email.com",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "PA@c123",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/products?name=Camiseta",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"products"
+									],
+									"query": [
+										{
+											"key": "name",
+											"value": "Camiseta"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "products por categoria",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "paloma.souza@email.com",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "PA@c123",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/products?categoryName=Eletrônicos",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"products"
+									],
+									"query": [
+										{
+											"key": "categoryName",
+											"value": "Eletrônicos"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "products por valor min",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "paloma.souza@email.com",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "PA@c123",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/products?minPrice=100",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"products"
+									],
+									"query": [
+										{
+											"key": "minPrice",
+											"value": "100"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "products por valor max",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "paloma.souza@email.com",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "PA@c123",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/products?maxPrice=500",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"products"
+									],
+									"query": [
+										{
+											"key": "maxPrice",
+											"value": "500"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "products por valor min-max",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "username",
+											"value": "paloma.souza@email.com",
+											"type": "string"
+										},
+										{
+											"key": "password",
+											"value": "PA@c123",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/products?minPrice=100&maxPrice=500",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"products"
+									],
+									"query": [
+										{
+											"key": "minPrice",
+											"value": "100"
+										},
+										{
+											"key": "maxPrice",
+											"value": "500"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "ADMIN",
+			"item": [
+				{
+					"name": "CRUD ORDER",
+					"item": [
+						{
+							"name": "get order",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:8080/orders",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"orders"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "criação de order",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"orderStatus\":\"WAITING_PAYMENT\",\n    \"items\": [\n        {\n            \"quantity\": 1,\n            \"product\": {\n                \"id\": 6\n            }\n        },\n        {\n            \"quantity\": 1,\n            \"product\": {\n                \"id\": 8\n            }\n        }\n    ],\n    \"discount\": {\n    \"id\": 3\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/orders",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"orders"
+									],
+									"query": [
+										{
+											"key": "orders",
+											"value": null,
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "criação de order Copy",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"orderStatus\":\"DOIS\",\n    \"items\": [\n        {\n            \"quantity\": 1,\n            \"product\": {\n                \"id\": 6\n            }\n        },\n        {\n            \"quantity\": 1,\n            \"product\": {\n                \"id\": 8\n            }\n        }\n    ],\n    \"discount\": {\n    \"id\": 3\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/orders",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"orders"
+									],
+									"query": [
+										{
+											"key": "orders",
+											"value": null,
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "adicionando cupom a um order",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:8080/orders/48/apply-coupon/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"orders",
+										"48",
+										"apply-coupon",
+										"1"
+									],
+									"query": [
+										{
+											"key": "orders",
+											"value": null,
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "atualização de order - adicionando pagamento",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\"paymentMethod\": \"PIX\"}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/orders/48/payment",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"orders",
+										"48",
+										"payment"
+									],
+									"query": [
+										{
+											"key": "orders",
+											"value": null,
+											"disabled": true
+										}
+									]
+								},
+								"description": "posso mudar o status pelo nome ou id"
+							},
+							"response": []
+						},
+						{
+							"name": "atualização de order - requisição geral",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"orderStatus\": \"WAITING_PAYMENT\",\n    \"client\": {\n        \"id\": 1\n    },\n    \"discount\": {\n        \"id\": 2\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/orders/49",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"orders",
+										"49"
+									],
+									"query": [
+										{
+											"key": "orders",
+											"value": null,
+											"disabled": true
+										}
+									]
+								},
+								"description": "Adicionei todas as informações de novo (sem infos de pagamento ainda) e só mudei o cupom"
+							},
+							"response": []
+						},
+						{
+							"name": "atualização de order - adicionar produto",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "[\n  {\n    \"product\": {\n      \"id\": 3\n    },\n    \"quantity\": 1\n  },\n  {\n    \"product\": {\n      \"id\": 4\n    },\n    \"quantity\": 1\n  }\n]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/orders/49/items",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"orders",
+										"49",
+										"items"
+									],
+									"query": [
+										{
+											"key": "orders",
+											"value": null,
+											"disabled": true
+										}
+									]
+								},
+								"description": "Adicionei todas as informações de novo (sem infos de pagamento ainda) e só mudei o cupom"
+							},
+							"response": []
+						},
+						{
+							"name": "atualização de order - mudando status",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \"orderStatus\": \"CANCELED\" }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/orders/49/status",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"orders",
+										"49",
+										"status"
+									],
+									"query": [
+										{
+											"key": "orders",
+											"value": null,
+											"disabled": true
+										}
+									]
+								},
+								"description": "posso mudar o status pelo nome ou id"
+							},
+							"response": []
+						},
+						{
+							"name": "atualização de order - deletando um cupom",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:8080/orders/49/remove-coupon",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"orders",
+										"49",
+										"remove-coupon"
+									],
+									"query": [
+										{
+											"key": "orders",
+											"value": null,
+											"disabled": true
+										}
+									]
+								},
+								"description": "Adicionei todas as informações de novo (sem infos de pagamento ainda) e só mudei o cupom"
+							},
+							"response": []
+						},
+						{
+							"name": "atualização de order - deletando um produto",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:8080/orders/49/remove-product/3",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"orders",
+										"49",
+										"remove-product",
+										"3"
+									],
+									"query": [
+										{
+											"key": "orders",
+											"value": null,
+											"disabled": true
+										}
+									]
+								},
+								"description": "Adicionei todas as informações de novo (sem infos de pagamento ainda) e só mudei o cupom"
+							},
+							"response": []
+						},
+						{
+							"name": "deletando order",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/orders/49",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"orders",
+										"49"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "CRUD USER",
+					"item": [
+						{
+							"name": "criando user",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n        \"name\": \"Paula Araujo\",\n        \"email\": \"Paula.souza@email.com\",\n        \"phone\": \"11954327784\",\n        \"password\": \"PA@c123\",\n        \"role\": \"USER\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/users",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"users"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "buscando user",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/users",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"users"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "atualizando parcialmente user",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{   \n    \"phone\": \"119589027784\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/users/133",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"users",
+										"133"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deletando user",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/users/139",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"users",
+										"139"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "CRUD PRODUCT",
+					"item": [
+						{
+							"name": "criando product",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"description\": \"Descrição do Produto A\",\n    \"price\": 199.99\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/products?categoryId=1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"products"
+									],
+									"query": [
+										{
+											"key": "categoryId",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "atualizando product",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Camiseta de Algodão\",\n    \"description\": \"Camiseta confortável para o dia a dia\",\n    \"price\": 49.90,\n    \"categories\": [\n        {\n            \"id\": 1\n        },\n        {\n            \"id\": 2\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/products/13",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"products",
+										"13"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "buscando products",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "PA@c123",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "paloma.souza@email.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/products",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"products"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "atualizando product",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Produto A\",\n    \"description\": \"Descrição do Produto A\",\n    \"price\": 199.99\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/products/13",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"products",
+										"13"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deletando product",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/products/13",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"products",
+										"13"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "CRUD CATEGORY",
+					"item": [
+						{
+							"name": "criando category",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"teste\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/categories",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"categories"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "atualizando category",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"testes2\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/categories/9",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"categories",
+										"9"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deletando category",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"testes\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/categories/9",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"categories",
+										"9"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "consultando categorias",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/categories",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"categories"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "CRUD COUPOM",
+					"item": [
+						{
+							"name": "criando cupom",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"code\": \"DESC50\",\n  \"discountPercentage\": 50.0\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/cupons",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"cupons"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "atualizando cupom",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"code\": \"DESC60\",\n  \"discountPercentage\": 60.0\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/cupons/7",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"cupons",
+										"7"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "buscando cupom",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "PA@c123",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "paloma.souza@email.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"code\": \"DESC40\",\n  \"discountPercentage\": 40.0\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/cupons",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"cupons"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deletando cupom",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"code\": \"DESC40\",\n  \"discountPercentage\": 40.0\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/cupons/7",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"cupons",
+										"7"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "FILTROS",
+					"item": [
+						{
+							"name": "order por status",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/orders?PAID",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"orders"
+									],
+									"query": [
+										{
+											"key": "PAID",
+											"value": null
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "order por user",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/orders?userId=130",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"orders"
+									],
+									"query": [
+										{
+											"key": "userId",
+											"value": "130"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "products por name",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/products?name=Camiseta",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"products"
+									],
+									"query": [
+										{
+											"key": "name",
+											"value": "Camiseta"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "products por categoria",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/products?categoryName=Eletrônicos",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"products"
+									],
+									"query": [
+										{
+											"key": "categoryName",
+											"value": "Eletrônicos"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "products por valor min",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/products?minPrice=100",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"products"
+									],
+									"query": [
+										{
+											"key": "minPrice",
+											"value": "100"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "products por valor max",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/products?maxPrice=500",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"products"
+									],
+									"query": [
+										{
+											"key": "maxPrice",
+											"value": "500"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "products por valor min-max",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "Mik@232",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "admin@example.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/products?minPrice=100&maxPrice=500",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"products"
+									],
+									"query": [
+										{
+											"key": "minPrice",
+											"value": "100"
+										},
+										{
+											"key": "maxPrice",
+											"value": "500"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "update-passwords",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "Mik@232",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "admin@example.com",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/users/update-passwords",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						"update-passwords"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "Username",
+			"value": "",
+			"type": "string",
+			"disabled": true
+		},
+		{
+			"key": "Password",
+			"value": "",
+			"type": "string",
+			"disabled": true
+		}
+	]
+}

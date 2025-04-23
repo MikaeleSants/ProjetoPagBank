@@ -79,7 +79,6 @@ public class OrderResources {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Pedido criado com sucesso"),
             @ApiResponse(responseCode = "401", description = "Não autorizado"),
-            @ApiResponse(responseCode = "403", description = "Acesso negado"),
             @ApiResponse(responseCode = "422", description = "Erro de validação nos dados enviados", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationError.class))),
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })
