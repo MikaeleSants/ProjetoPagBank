@@ -103,7 +103,8 @@ USER → Acesso limitado a pedidos e leitura de produtos/categorias.
 
   3. Acesso para Administradores (ADMIN)
   Acesso completo para o CRUD de todas as entidades.
-
+    Importante: admin só pode ser criado por um admin. Para criar o primeiro admin o projeto conta com
+a classe AdminInitializer, que verifica se tem já tem um admin criado, senão cria um novo.
 
 ## **Fluxos Principais**
 ### **Fluxo de Cadastro de Order**

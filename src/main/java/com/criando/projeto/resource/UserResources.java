@@ -116,10 +116,4 @@ public class UserResources {
         return ResponseEntity.ok(updatedUser);
     }
 
-//METODO PARA CRIPTOGRAFAR SENHAS NO BANCO:
-/*    @PostMapping("/update-passwords")
-        public ResponseEntity<Void> updatePasswords() {
-        service.updatePasswordsForAllUsers();  // Chama o metodo para atualizar todas as senhas
-        return ResponseEntity.noContent().build();  // Retorna uma resposta 204 sem conteúdo
-   }*/
 }
