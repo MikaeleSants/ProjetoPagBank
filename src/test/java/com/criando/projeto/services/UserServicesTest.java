@@ -5,6 +5,7 @@ import com.criando.projeto.entities.enums.UserRole;
 import com.criando.projeto.repositories.UserRepository;
 import com.criando.projeto.security.UserSecurity;
 import com.criando.projeto.services.exceptions.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,6 +48,8 @@ class UserServicesTest {
 
     @BeforeEach
     void setUp() {
+        SecurityContextHolder.clearContext();
+
         user = new User();
         user.setId(1L);
         user.setName("User Um");
@@ -60,6 +63,11 @@ class UserServicesTest {
         userDois.setEmail("UserDois@gmail.com");
         userDois.setPassword("UsDo@123");
         userDois.setRole(UserRole.ADMIN);
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 
     private void setAsAdmin() {
@@ -79,6 +87,7 @@ class UserServicesTest {
     private void setAsDonoDoUsuario() {
         Authentication authentication = mock(Authentication.class);
         lenient().when(userSecurity.checkUserOwnership(authentication, user.getId())).thenReturn(true);
+        lenient().when(authenticationFacade.getAuthenticatedUser()).thenReturn(user);
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 

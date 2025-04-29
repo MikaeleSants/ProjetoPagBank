@@ -2,6 +2,7 @@ package com.criando.projeto.entities;
 
 import com.criando.projeto.entities.enums.OrderStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -25,6 +26,7 @@ public class Order implements Serializable {
     private Integer orderStatus;
     @ManyToOne
     @JoinColumn(name = "client_id")
+    @JsonIgnoreProperties({"email", "phone", "password", "role"})
     private User client;
     @OneToMany(mappedBy = "id.order", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<OrderItem> items = new HashSet<>();
